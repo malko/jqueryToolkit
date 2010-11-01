@@ -12,6 +12,8 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2010-11-01 - make _tk property an exposed property of constructor and make it more easy to extend
+              - make a little change in _readClassNameOpts to allow usage of submasks and assertions in _classNameOptions expressions
  - 2010-08-31 - some more work on plugin inheritance (instanceof basePlugin will only be true if basePlugin is a toolkit.plugin (we want to create a toolkit.plugin! ))
  - 2010-07-26 - first attempt for pseudo plugin inheritance
  - 2010-07-22 - add tkSetState() method
@@ -96,12 +98,7 @@ $.toolkit = function(pluginName,basePlugin,prototype){
 			return;
 		}
 		var self = this;
-		self._tk ={
-			nameSpace : nameSpace,
-			pluginName: pluginName,
-			baseClass : nameSpace+'-'+pluginName,
-			initialized:false
-		};
+		self._tk = $.extend({initialized:false},$[nameSpace][pluginName]._tk);
 		self.elmt = $(elmt).ensureId();
 		self.elmt.data(pluginName,self);
 		//-- merge options
@@ -165,7 +162,12 @@ $.toolkit = function(pluginName,basePlugin,prototype){
 		//- $.toolkit.plugin.prototype, //-- extend it with base tk prototype
 		prototype //-- finally add plugin own methods
 	);*/
-
+	//-- set and expose _tk values as constructor property
+	$[nameSpace][pluginName]._tk=$.extend({
+		nameSpace:nameSpace,
+		pluginName:pluginName,
+		baseClass:nameSpace+'-'+pluginName
+	},prototype._tk||{});
 	//-- expose plugin function to the world
 	$.fn[pluginName] = function(){
 		var method = null,propName=null,onlyOne=false;
@@ -216,12 +218,14 @@ $.toolkit = function(pluginName,basePlugin,prototype){
 */
 $.toolkit.plugin = function(){};
 $.toolkit.plugin.prototype = {
+	/* this is internal property of the plugin set a the instanciation time
 	_tk:{
 		nameSpace:null,
 		pluginName:'tkplugin',
 		baseClass:'tk-plugin',
 		initialized:false
 	},
+	*/
 	/*
 	// optional options and their values that may be applyed by element's class attribute. (init options will overwrite them)
 	_classNameOptions: {
@@ -396,7 +400,7 @@ $.toolkit._readClassNameOpts=function(elmt,baseClass,optionsList){
 		return {};
 	}
 	//prepare expression
-	var opts={}, optName='', id=0, exp = '(?:^|\\s)'+baseClass+'(?=-)',noCaptureExp = /(^|[^\\])\((?!\?:)/g, oVals;
+	var opts={}, optName='', id=0, exp = '(?:^|\\s)'+baseClass+'(?=-)',noCaptureExp = /(^|[^\\])\((?!\?)/g, oVals;
 	for(optName in optionsList ){
 		oVals = optionsList[optName].replace(noCaptureExp,'$1(?:');//-- avoid capture parentheses inside expression
 		exp += ( oVals.substr(0,1)=='|' )?'(?:-('+oVals.substr(1)+'))?':'-('+oVals+')';
