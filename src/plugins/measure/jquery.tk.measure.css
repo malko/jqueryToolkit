@@ -1,0 +1,40 @@
+.tk-measure-vertical, .tk-measure-horizontal{
+	position:absolute;
+	width:0px;
+	height:0px;
+	top:0;
+	left:0;
+	display:none;
+	padding:0;
+	margin:0;
+}
+.tk-measure-vertical{
+	border-left:dotted black 1px;
+}
+.tk-measure-horizontal{
+	border-top:dotted black 1px;
+}
+.tk-measure-square{
+	border:dotted black 1px;
+	opacity:.5;
+	background:#eee;
+	position:absolute;
+	padding:0;
+	margin:0;
+	display:none;
+}
+.tk-measure-display{
+	background:#000;
+	color:#fff;
+	position:absolute;
+	opacity:.75;
+	font-size:12px;
+	white-space:pre;
+	font-family:monospace;
+	display:none;
+}
+.tk-unselectable,.tk-unselectable *{
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+}

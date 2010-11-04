@@ -1,0 +1,24 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../jquery.toolkit.css" />
+<script src="../../../jquery-1.4.3.js" type="text/javascript"></script>
+<script src="../../jquery.toolkit.js" type="text/javascript"></script>
+<script src="jquery.tk.measure.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="jquery.tk.measure.css" />
+<script>
+$(function(){
+$.toolkit.initPlugins('measure');
+});
+</script>
+</head>
+<body>
+	<button type="button" class="tk-measure">measure</button>
+	<div style="background:red;color:white;margin:50px;width:150px;height:150px;" class="tk-inlineStack">
+		<div class="tk-content">a 150&times;150 square to measure</div>
+	</div>
+
+	<div style="background:green;color:white;margin:50px;text-align:center" class="tk-inlineStack">
+		<div class="tk-content">to stop measuring :<br/>just click measure button again<br />or just hit Escape.</div>
+	</div>
+</body>
+</html>

@@ -12,6 +12,7 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2010-11-02 - add new selector :textnode and add textChildren method to jquery
  - 2010-11-01 - make _tk property an exposed property of constructor and make it more easy to extend
               - make a little change in _readClassNameOpts to allow usage of submasks and assertions in _classNameOptions expressions
  - 2010-08-31 - some more work on plugin inheritance (instanceof basePlugin will only be true if basePlugin is a toolkit.plugin (we want to create a toolkit.plugin! ))
@@ -448,6 +449,8 @@ $.toolkit.requestUniqueId = function(){
 	window.top.jQuery.toolkit._uniqueId=1;
 	return 'tkUID'+window.top.jQuery.toolkit._uniqueId;
 }
+
+//-- some jquery methods extensions
 $.extend($.fn,{
 	ensureId:function(){
 		return this.each(function(){
@@ -471,8 +474,25 @@ $.extend($.fn,{
 	tkSetState:function(state){
 		$.toolkit._removeClassExp(this,'tk-state-*','tk-state-'+state);
 		return this;
+	},
+	textChildren: function(){
+		var res = [],childs=this.attr('childNodes'),i,l;
+		for( i=0,l=childs.length;i<l;i++){
+			if( childs[i].nodeType===3 ){
+				res.push(childs[i]);
+			}
+		}
+		return $(res);
 	}
 });
+
+//-- jquery selectors extensions
+$.extend($.expr[':'],{
+	textnode: function(a) {
+		return a.nodeType==3?true:false ;
+	}
+});
+
 //-- ensure bgiframe function if not already included --//
 /* Copyright (c) 2006 Brandon Aaron (http://brandonaaron.net)
 * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
