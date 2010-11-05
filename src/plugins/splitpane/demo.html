@@ -1,0 +1,46 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../../jquery.toolkit.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js" type="text/javascript"></script>
+<script src="../../jquery.toolkit.js" type="text/javascript"></script>
+<script src="jquery.tk.splitpane.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="jquery.tk.splitpane.css" />
+<script src="../measure/jquery.tk.measure.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../measure/jquery.tk.measure.css" />
+<script>
+
+$(function(){ $.toolkit.initPlugins('splitpane|measure');});
+
+
+</script>
+</head>
+<body>
+<button type="button" class="tk-measure tk-inlineStack tk-border tk-state-normal "> init measure </button>
+<div class="tk-splitpane" style="width:750px;height:550px;margin:auto;">
+	<div class="">top pane</div>
+	<div class="tk-splitpane tk-splitpane-horizontal">
+		<div class="tk-splitpane-pane-150">left pane</div>
+		<div>center pane</div>
+		<div class="tk-splitpane-pane-50-250">right pane</div>
+	</div>
+	<div class="">bottom pane</div>
+</div>
+<br />
+<div class="tk-state-normal tk-splitpane tk-splitpane-horizontal" style="width:250px;height:250px;margin:auto;">
+	<div class="tk-state-normal">pane1 qsdqsd<br /> qdqs</div>
+	<div class="tk-state-normal">pane2</div>
+</div>
+<br />
+<div class="tk-state-normal tk-splitpane tk-splitpane-vertical" style="width:250px;height:250px;margin:auto;">
+	<div class="tk-state-normal">pane1</div>qdqs
+	<div class="tk-state-normal">pane2</div>
+</div>
+<br />
+<!--div class="tk-state-normal tk-splitpane tk-splitpane-2" style="width:250px;height:250px;margin:auto;">
+	<div class="tk-state-normal">pane1</div>
+	<div class="tk-state-normal">pane2</div>
+	<div class="tk-state-normal">pane3</div>
+	<div class="tk-state-normal">pane3</div>
+</div-->
+</body>
+</html>

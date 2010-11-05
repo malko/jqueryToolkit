@@ -1,0 +1,62 @@
+.tk-paneSplitter{
+	background-color:#fefefe;
+	background-position:center center;
+	background-repeat:no-repeat;
+	background-image:url("data:image/gif;base64,R0lGODlhCgAKAIABAD8/PwAAACH5BAEKAAEALAAAAAAKAAoAAAISBBKGpnmOopy0WbZeo3ze/DkFADs=");
+	cursor:pointer;
+	border: solid silver 1px;
+	padding:0!important;
+	position:relative;
+	margin:0!important;
+
+}
+.tk-paneSplitter-spacer{
+	zoom:1;
+	width:10px;
+	height:10px;
+	visibility:hidden;
+	display:block;
+}
+.tk-paneSplitter-orientation-vertical{
+	display:block;
+	border-right:none;
+	border-left:none;
+}
+.tk-paneSplitter-orientation-horizontal{
+	zoom:1;
+	display:-moz-inline-stack;
+	display:inline-block;
+	*display:inline;
+	vertical-align:middle;
+	border-top:none;
+	border-bottom:none;
+}
+
+.tk-paneSplitter-held{
+	cursor:move;
+	position:absolute;
+	width:99%;
+	height:99%;
+}
+
+.tk-splitpane{
+	overflow:hidden;
+	white-space:nowrap!important;
+	border:solid red 1px;
+}
+.tk-splitpane-pane{
+	padding:0;
+	margin:0!important;
+	overflow:auto;
+	border:solid silver 1px;
+}
+.tk-splitpane-pane.tk-splitpane{
+	overflow:hidden;
+}
+.tk-splitpane-orientation-horizontal .tk-splitpane-pane{
+	zoom:1;
+	display:-moz-inline-stack;
+	display:inline-block;
+	*display:inline;
+	vertical-align:middle;
+}
