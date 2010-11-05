@@ -15,7 +15,9 @@ was really missing to better stick to my way of doing things so i start this new
  - 2010-11-02 - add new selector :textnode and add textChildren method to jquery
  - 2010-11-01 - make _tk property an exposed property of constructor and make it more easy to extend
               - make a little change in _readClassNameOpts to allow usage of submasks and assertions in _classNameOptions expressions
- - 2010-08-31 - some more work on plugin inheritance (instanceof basePlugin will only be true if basePlugin is a toolkit.plugin (we want to create a toolkit.plugin! ))
+ - 2010-10-xx - added optional second parameter nameSpace to $.toolkit.initPlugins (default to "tk" if not passed)
+              - $.toolkit.initPlugins can now take 'all' as a parameter and it will try to init all preloaded plugins in the given nameSpace
+   2010-08-31 - some more work on plugin inheritance (instanceof basePlugin will only be true if basePlugin is a toolkit.plugin (we want to create a toolkit.plugin! ))
  - 2010-07-26 - first attempt for pseudo plugin inheritance
  - 2010-07-22 - add tkSetState() method
  - 2010-07-13 - add support for user define initPlugin method ($.tk.[pluginName].initPlugin = function(){...})
@@ -339,16 +341,29 @@ $.toolkit.plugin.prototype = {
 };
 
 //-- TOOLKIT HELPER METHODS --//
-$.toolkit.initPlugins = function(pluginNames){
+$.toolkit.initPlugins = function(pluginNames,nameSpace){
+	if(! nameSpace){
+		nameSpace = 'tk';
+	}
+	if( pluginNames == '' ){
+		pluginNames = 'all';
+	}
 	if(typeof pluginNames === 'string'){
+		if( pluginNames !=='all'){
 		pluginNames = pluginNames.split(/[|,]/);
+		}else{ //-- try to init all loaded plugins
+			pluginNames = [];
+			for( var i in $[nameSpace]){
+				pluginNames.push(i);
+			}
+		}
 	}
 	for( var i=0,l=pluginNames.length,p='';i<l;i++){
 		p=pluginNames[i];
-		if( $.tk && $.tk[p] && $.isFunction($.tk[p].initPlugin)){
-			$.tk[p].initPlugin();
+		if( $[nameSpace] && $[nameSpace][p] && $.isFunction($[nameSpace][p].initPlugin)){
+			$[nameSpace][p].initPlugin();
 		}else{
-			new Function("jQuery('.tk-"+p+"')."+p+"()")();
+			new Function("jQuery('."+nameSpace+"-"+p+"')."+p+"()")();
 		}
 	}
 };
