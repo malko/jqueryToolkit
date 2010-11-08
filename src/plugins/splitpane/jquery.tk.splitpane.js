@@ -12,7 +12,7 @@ $.toolkit('tk.paneSplitter',{
 		self.elmt.append('<span class="tk-paneSplitter-spacer"></span>');
 		self.prev=self.elmt.prev('.'+$.tk.splitpane._tk.baseClass+'-pane');
 		self.next=self.elmt.next('.'+$.tk.splitpane._tk.baseClass+'-pane');
-		self.capturePos = {start:[0,0],min:[0,0],max:[0,0]};
+		self.capturePos = {start:{top:0,left:0},min:{top:0,left:0},max:{top:0,left:0}};
 		self.elmt.bind('mousedown',function(e){
 			self.startCapture(e);
 		}).click(function(e){self.toggle(e)});
@@ -53,10 +53,12 @@ $.toolkit('tk.paneSplitter',{
 	_set_min:function(m){
 		this.options.min = Math.max(0,parseInt(m,10));
 		this.__checkSize(true);
+		return this.options.min;
 	},
 	_set_max:function(m){
 		this.options.max = Math.max(0,parseInt(m,10));
 		this.__checkSize(true);
+		return this.options.max;
 	},
 
 	/** accessor to primary and secondary panes elemnts * /
@@ -108,12 +110,30 @@ $.toolkit('tk.paneSplitter',{
 		if( ! this.secondary.is(':visible') ){
 			return;
 		}
-		var self = this;
-		self.capturePos.start = [e.pageX,e.pageY];
+		var self = this
+			, posProp = self.__posProp()
+			, sizeProp = self.__sizeProp()
+			, outerProp = self.__outerProp(sizeProp)
+			, posVal = self.options.orientation==='vertical'?e.pageY:e.pageX
+			;
+		self.capturePos.start = {top:e.pageY,left:e.pageX};
 		//-- calc max and min
-
-		self.capturePos.min = [e.pageX-self.prev.outerWidth(),e.pageY-self.prev.outerHeight()];
-		self.capturePos.max = [e.pageX+self.next.outerWidth(),e.pageY+self.next.outerHeight()];
+		self.capturePos.min[posProp] = posVal - self.prev[outerProp]();
+		self.capturePos.max[posProp] = posVal + self.next[outerProp]();
+		if( self.options.min){
+			if( self.options.primary==='next'){
+				self.capturePos.min[posProp] += self.options.min;
+			}else{
+				self.capturePos.max[posProp] -= self.options.min;
+			}
+		}
+		if( self.options.max){
+			if( self.options.primary==='next'){
+				self.capturePos.max[posProp] = Math.min(self.capturePos.max[posProp],posVal - self.prev[outerProp]() +self.options.max);
+			}else{
+				self.capturePos.min[posProp] = Math.max(self.capturePos.min[posProp],posVal + self.next[outerProp]() -self.options.max);
+			}
+		}
 		//-- init mousemove event
 		$(window)
 			.bind('mousemove.paneSplitter',function(e){ self.capture(e); })
@@ -122,13 +142,14 @@ $.toolkit('tk.paneSplitter',{
 	capture:function(e){
 		var self = this,delta=self.__get_capturePostitionDelta(e);
 		if(! self.clone.is(':visible')){
-			self.clone.show().css({top:'0.5%',left:'0.5%'});
+			self.clone.show().css({
+				width:self.elmt.width(),
+				height:self.elmt.height(),
+				top:-parseInt(self.clone.css('borderTopWidth'),10),
+				left:-parseInt(self.clone.css('borderLeftWidth'),10),
+			});
 		}
-		if( self.options.orientation === 'vertical'){
-			self.clone.css({top:delta,left:'0.5%'});
-		}else{
-			self.clone.css({left:delta,top:'0.5%'});
-		}
+		self.clone.css(self.__posProp(),delta);
 	},
 	stopCapture:function(e){
 		$(window).unbind('.paneSplitter');
@@ -170,13 +191,14 @@ $.toolkit('tk.paneSplitter',{
 		}
 	},
 	__get_capturePostitionDelta:function(e){
-		if( this.options.orientation==='vertical' ){
-			return Math.max(Math.min(e.pageY, this.capturePos.max[1]),this.capturePos.min[1]) - this.capturePos.start[1] ;
-		}
-		return Math.max(Math.min(e.pageX, this.capturePos.max[0]),this.capturePos.min[0]) - this.capturePos.start[0];
+		var posProp = this.__posProp();
+		return Math.max(Math.min(posProp==='top'?e.pageY:e.pageX, this.capturePos.max[posProp]),this.capturePos.min[posProp]) - this.capturePos.start[posProp] ;
 	},
 	__sizeProp:function(){
 		return this.options.orientation==='vertical'?'height':'width';
+	},
+	__posProp:function(){
+		return this.options.orientation==='vertical'?'top':'left';
 	},
 	__outerProp:function(p){
 		return "outer"+p.replace(/^./,function(m){return m.toUpperCase();});
@@ -190,7 +212,6 @@ $.tk.paneSplitter.defaults = {
 	, toggleSpeed:100
 	, min:0
 	, max:0
-	//- , opened:true
 };
 
 
@@ -206,7 +227,7 @@ $.toolkit('tk.splitpane',{
 		self.panes = self.elmt.children('div').addClass(self._tk.baseClass+'-pane');
 		//-- make separators
 		self.panes.not(':last').after('<div class="'+$.tk.paneSplitter._tk.baseClass+'"></div>');
-		self.separators = self.elmt.find(' > .'+$.tk.paneSplitter._tk.baseClass).paneSplitter();//{orienation:self.options.orienation});
+		self.separators = self.elmt.find(' > .'+$.tk.paneSplitter._tk.baseClass).paneSplitter();
 		//-- make the last pane (if only 2 ) the main one, else make the one before a main pane
 		if( self.options.mainPane!==null && self.options.mainPane < self.panes.length){
 			self.mainPane = self.panes.filter(':eq('+self.options.mainPane+')');

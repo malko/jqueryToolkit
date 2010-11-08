@@ -42,16 +42,17 @@
 .tk-splitpane{
 	overflow:hidden;
 	white-space:nowrap!important;
-	border:solid red 1px;
+	border:solid silver 1px;
 }
 .tk-splitpane-pane{
 	padding:0;
 	margin:0!important;
 	overflow:auto;
-	border:solid silver 1px;
+	/*border:solid silver 1px;*/
 }
 .tk-splitpane-pane.tk-splitpane{
 	overflow:hidden;
+	border-width:0;
 }
 .tk-splitpane-orientation-horizontal .tk-splitpane-pane{
 	zoom:1;
