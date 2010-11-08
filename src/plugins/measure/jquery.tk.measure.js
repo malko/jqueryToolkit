@@ -4,6 +4,8 @@ it also can display a measurable area by holding down mouse button while moving.
 @author jonathan gotti <jgotti at jgotti dot net>
 @licence Dual licensed under the MIT / GPL licenses.
 @since 2010-11
+@changelog
+ - 2010-11-08 - add zIndex management
 */
 (function($){
 
@@ -20,17 +22,20 @@ it also can display a measurable area by holding down mouse button while moving.
 		active:false,
 
 		_init:function(){
-			var self = this;
+			var self = this,zIndex=0;
+			//-- check for highest z-index value
+			$('*').each(function(){
+				zIndex=Math.max(zIndex,parseInt($(this).css('zIndex'),10)||0);
+			});
+			zIndex+=1;
 			//-- create elements needed for measure
 			self.top = $('<div class="tk-measure-vertical"/>');
 			self.right = $('<div class="tk-measure-horizontal"/>');
 			self.bottom = $('<div class="tk-measure-vertical"/>');
 			self.left = $('<div class="tk-measure-horizontal"/>');
-			self.square = $('<div class="tk-measure-square"/>').appendTo('body');
+			self.square = $('<div class="tk-measure-square"/>').appendTo('body').css('zIndex',zIndex);
 			self.display = $('<div class="tk-measure-display tk-corner tk-content"/>');
-			self.all = $([self.top[0],self.right[0],self.bottom[0],self.left[0],self.display[0]]).appendTo('body');
-
-
+			self.all = $([self.top[0],self.right[0],self.bottom[0],self.left[0],self.display[0]]).appendTo('body').css('zIndex',zIndex);
 			self.elmt.bind('mousedown.measure',function(e){self.toggle(e);return false;});
 		},
 		toggle:function(e){
