@@ -6,6 +6,8 @@ it also can display a measurable area by holding down mouse button while moving.
 @since 2010-11
 @changelog
  - 2010-11-08 - add zIndex management
+              - correct bugs on ie
+              - add squareClass and squareOpacity options
 */
 (function($){
 
@@ -45,14 +47,14 @@ it also can display a measurable area by holding down mouse button while moving.
 			var self = this;
 			self.all.show();
 			self.square.hide();
-			$(window).bind('mousemove.measure',function(e){self.move(e);});
-			$(window).bind('keyup.measure',function(e){if( e.which===27) self.stop();})
-			$(window).bind('mousedown.measure',function(e){self.squareStart(e);e.preventDefault();return false;});
+			$('body').bind('mousemove.measure',function(e){self.move(e);return false;});
+			$('body').bind('keydown.measure',function(e){if( e.which===27) self.stop();})
+			$('body').bind('mousedown.measure',function(e){self.squareStart(e);e.preventDefault();return false;});
 			self.move(e);
 			self.active=true;
 		},
 		stop:function(e){
-			$(window).unbind('.measure');
+			$('body').unbind('.measure');
 			this.all.hide();
 			this.square.hide();
 			this.active=false;
@@ -60,9 +62,9 @@ it also can display a measurable area by holding down mouse button while moving.
 
 		squareStart:function(e){
 			var self = this;
-			$(window).one('mouseup.measure',function(e){self.squareEnd(e);});
+			$('body').one('mouseup.measure',function(e){self.squareEnd(e);});
 			self.squareStartPos=[e.pageX,e.pageY];
-			self.square.css({height:0,width:0,top:e.pageY,left:e.pageX}).show();
+			self.square.css({height:0,width:0,top:e.pageY,left:e.pageX,opacity:self.options.squareOpacity}).addClass(self.options.squareClass).show();
 			$('body').addClass('tk-unselectable');
 		},
 		squareEnd:function(e){
@@ -102,14 +104,14 @@ it also can display a measurable area by holding down mouse button while moving.
 			});
 
 			if( self.square.is(':visible')){
-				var squareW = self.squareStartPos[0] - e.pageX, squareH = self.squareStartPos[1] - e.pageY;
+				var squareW = self.squareStartPos[0] - e.pageX, squareH = self.squareStartPos[1] - e.pageY, delta=$.support.boxModel?1:-1;
 				self.square.css({
 					top:   Math.min(e.pageY, self.squareStartPos[1]),
 					left:  Math.min(e.pageX, self.squareStartPos[0]),
-					width: Math.max(squareW,0-squareW)-1,
-					height:Math.max(squareH,0-squareH)-1
+					width: Math.max(squareW,0-squareW)-delta,
+					height:Math.max(squareH,0-squareH)-delta
 				});
-				msg += '\n    <u>size:</u> '+self.square.outerWidth()+'&times;'+self.square.outerHeight();
+				msg += '<br />    <u>size:</u> '+self.square.outerWidth()+'&times;'+self.square.outerHeight();
 			}
 			self.display.html(msg).css({
 				top:(w.scrollTop()+w.height()<pageY+self.display.outerHeight()+space)?e.pageY-self.display.outerHeight()-space:pageY,
@@ -119,7 +121,10 @@ it also can display a measurable area by holding down mouse button while moving.
 		}
 	});
 	$.tk.measure.defaults={
-		space:10
+		space:10,
+		squareOpacity:.7,
+		squareClass:'tk-state-normal'
+
 	};
 
 })(jQuery);
