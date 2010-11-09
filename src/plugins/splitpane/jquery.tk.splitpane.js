@@ -1,4 +1,6 @@
-
+/**
+known bug doesn't work in ie with quirkMode
+*/
 (function(){
 
 $.toolkit('tk.paneSplitter',{
@@ -12,10 +14,12 @@ $.toolkit('tk.paneSplitter',{
 		self.elmt.append('<span class="tk-paneSplitter-spacer"></span>');
 		self.prev=self.elmt.prev('.'+$.tk.splitpane._tk.baseClass+'-pane');
 		self.next=self.elmt.next('.'+$.tk.splitpane._tk.baseClass+'-pane');
-		self.capturePos = {start:{top:0,left:0},min:{top:0,left:0},max:{top:0,left:0}};
-		self.elmt.bind('mousedown',function(e){
-			self.startCapture(e);
-		}).click(function(e){self.toggle(e)});
+		self.capturePos = {start:{top:0,left:0},min:{top:0,left:0},max:{top:0,left:0},moved:false};
+		self.elmt.bind('mousedown.paneSplitter',function(e){
+			return self.startCapture(e);
+		})
+		.bind('mouseup.paneSplitter',function(e){ self.stopCapture(e); e.preventDefault();});
+		//.bind('click.paneSplitter',function(e){ if( !self.capturePos.moved ){self.toggle(e);} });
 		//-- create clone node for visual resizing
 		self.clone = self.elmt.clone().appendTo(self.elmt).addClass('tk-paneSplitter-held').css({
 			opacity:.6,
@@ -135,9 +139,10 @@ $.toolkit('tk.paneSplitter',{
 			}
 		}
 		//-- init mousemove event
-		$(window)
-			.bind('mousemove.paneSplitter',function(e){ self.capture(e); })
-			.bind('mouseup.paneSplitter',function(e){ self.stopCapture(e); });
+		$('body')
+			.bind('mousemove.paneSplitter',function(e){ self.capture(e); return false;})
+			.bind('mouseup.paneSplitter',function(e){ self.stopCapture(e); e.preventDefault();});
+		return false;
 	},
 	capture:function(e){
 		var self = this,delta=self.__get_capturePostitionDelta(e);
@@ -146,14 +151,17 @@ $.toolkit('tk.paneSplitter',{
 				width:self.elmt.width(),
 				height:self.elmt.height(),
 				top:-parseInt(self.clone.css('borderTopWidth'),10),
-				left:-parseInt(self.clone.css('borderLeftWidth'),10),
+				left:-parseInt(self.clone.css('borderLeftWidth'),10)
 			});
 		}
 		self.clone.css(self.__posProp(),delta);
 	},
 	stopCapture:function(e){
-		$(window).unbind('.paneSplitter');
+		$('body').unbind('.paneSplitter');
 		var self = this,delta=self.__get_capturePostitionDelta(e),sizeProp=self.__sizeProp();
+		if(! self.clone.is(':visible') ){
+			return self.toggle(e);
+		}
 		self.clone.hide();
 		self.prev[sizeProp](self.prev[sizeProp]()+delta);
 		self.next[sizeProp](self.next[sizeProp]()-delta);
