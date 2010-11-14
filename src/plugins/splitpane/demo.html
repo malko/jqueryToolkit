@@ -7,33 +7,51 @@
 <script src="../../jquery.toolkit.storage.js" type="text/javascript"></script>
 <script src="jquery.tk.splitpane.js" type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="jquery.tk.splitpane.css" />
+<script src="../measure/jquery.tk.measure.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="../measure/jquery.tk.measure.css" />
+<style type="text/css">
+body{ text-align:center; font-size:12px;}
+#layout{ margin:auto; text-align:left;width:750px;height:400px;}
+h1{ font-size:1.4em;}
+h2{ font-size:1.2em;}
+h3{ font-size:1.1em;}
+
+</style>
 <script>
-
-$(function(){ $.toolkit.initPlugins('splitpane');});
-
-
+//localStorage.clear();
+$(function(){ $.toolkit.initPlugins('splitpane|measure');});
 </script>
 </head>
 <body>
-<button type="button" class="tk-measure tk-inlineStack tk-border tk-state-normal "> init measure </button>
-<div class="tk-splitpane" style="width:750px;height:550px;margin:auto;">
-	<div class="tk-splitpane-pane-50-75">top pane</div>
-	<div class="tk-splitpane tk-splitpane-horizontal">
-		<div class="tk-splitpane-pane-150">left pane</div><div>center pane</div><div class="tk-splitpane-pane-50-250">right pane</div>
+	<button type="button" class="tk-measure tk-inlineStack tk-border tk-state-normal "> init measure </button>
+	<div id="layout" class="tk-splitpane">
+		<div class="tk-splitpane-pane-0-150-75">
+			<h1>Top Pane</h1>
+			This is a demo for jqueryToolkit splitpane plugin. This pane is constraint between 50px to 75px;
+		</div>
+		<div class="tk-splitpane tk-splitpane-horizontal">
+			<div class="tk-splitpane-pane-150-0-200">
+				<h2>Left Pane</h2>
+				<p>This pane min size is 150px, but there's no max value. The initial opening size would be 200px.</p>
+			</div><div>
+				<h2>Center Pane</h2>
+				<p>This is the main pane of the horizontal splitpane (which in turn is the main pane of it's parent vertical splitpane).</p>
+				<p>
+					It will keep panes sizes and state (opened/closed) stored even if you close your browser so when you will come again it will start in the state you left it.
+					<br>
+					This is possible by the integration of the toolkit.storage utility.
+				</p>
+			</div><div class="tk-splitpane-pane-50-150-closed">
+				<h2>right pane</h2>
+				<p>This paned is contained between 50px and 150px, and is closed on your first visit.</p>
+			</div>
+		</div>
+		<div class="tk-splitpane-pane-closed-100">
+			<h2>bottom pane</h2>
+			<p>
+				This pane is closed the first time you visit the page and will open to a size of 100 on the first time
+			</p>
+		</div>
 	</div>
-	<div class="tk-splitpane-pane-25-50">bottom pane</div>
-</div>
-<br />
-<div class="tk-state-normal tk-splitpane tk-splitpane-horizontal" style="width:250px;height:250px;margin:auto;">
-	<div class="tk-state-normal">pane1 qsdqsd<br /> qdqs</div>
-	<div class="tk-state-normal">pane1 qsdqsd<br /> qdqs</div>
-	<div class="tk-state-normal">pane2</div>
-</div>
-<br />
-<div class="tk-state-normal tk-splitpane tk-splitpane-vertical" style="width:250px;height:250px;margin:auto;">
-	<div class="tk-state-normal">pane1</div>qdqs
-	<div class="tk-state-normal">pane2</div>
-	<div class="tk-state-normal">pane2</div>
-</div>
 </body>
 </html>

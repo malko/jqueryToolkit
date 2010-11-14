@@ -1,21 +1,40 @@
 .tk-paneSplitter{
 	zoom:1;
-	background-color:#fefefe;
-	background-position:center center;
-	background-repeat:no-repeat;
-	background-image:url("data:image/gif;base64,R0lGODlhCgAKAIABAD8/PwAAACH5BAEKAAEALAAAAAAKAAoAAAISBBKGpnmOopy0WbZeo3ze/DkFADs=");
 	cursor:pointer;
 	border: solid silver 1px;
 	padding:0!important;
 	position:relative;
 	margin:0!important;
-
+	background-color:#fafafa;
+	overflow:visible;
 }
 .tk-paneSplitter-spacer{
 	width:10px;
 	height:10px;
-	visibility:hidden;
 	display:block;
+	position:relative;
+	background-color:#fafafa;
+	background-position:center center;
+	background-repeat:no-repeat;
+	color:#888;
+	border:solid #888 1px;
+	line-height:10px;
+	font-size:10px;
+	font-family:monospace;
+	text-align:center;
+	background-image:url("data:image/gif;base64,R0lGODlhCgAKAIABAD8/PwAAACH5BAEKAAEALAAAAAAKAAoAAAISBBKGpnmOopy0WbZeo3ze/DkFADs=");
+}
+.tk-paneSplitter-orientation-vertical .tk-paneSplitter-spacer{
+	left:50%;
+	margin-left:-5px;
+	border-top:none;
+	border-bottom:none;
+}
+.tk-paneSplitter-orientation-horizontal .tk-paneSplitter-spacer{
+	top:50%;
+	margin-top:-5px;
+	border-left:none;
+	border-right:none;
 }
 .tk-paneSplitter-orientation-vertical{
 	display:block;
@@ -40,18 +59,18 @@
 
 .tk-splitpane{
 	overflow:hidden;
-	white-space:nowrap!important;
-	border:solid silver 1px;
+	border:solid #ccc 1px;
 }
 .tk-splitpane-pane{
 	padding:0;
 	margin:0!important;
 	overflow:auto;
-	/*border:solid silver 1px; /* dev only */
+	border-width:0;
 }
 .tk-splitpane-pane.tk-splitpane{
 	overflow:hidden;
 	border-width:0;
+	padding:0;
 }
 .tk-splitpane-orientation-horizontal .tk-splitpane-pane{
 	zoom:1;
