@@ -1,81 +1,84 @@
 .tk-paneSplitter{
-	zoom:1;
-	cursor:pointer;
-	border: solid silver 1px;
-	padding:0!important;
-	position:relative;
-	margin:0!important;
-	background-color:#fafafa;
-	overflow:visible;
+        zoom:1;
+        cursor:pointer;
+        border: solid silver 1px;
+        padding:0!important;
+        position:relative;
+        margin:0!important;
+        background-color:#fafafa;
+        overflow:visible;
 }
 .tk-paneSplitter-spacer{
-	width:10px;
-	height:10px;
-	display:block;
-	position:relative;
-	background-color:#fafafa;
-	background-position:center center;
-	background-repeat:no-repeat;
-	color:#888;
-	border:solid #888 1px;
-	line-height:10px;
-	font-size:10px;
-	font-family:monospace;
-	text-align:center;
-	background-image:url("data:image/gif;base64,R0lGODlhCgAKAIABAD8/PwAAACH5BAEKAAEALAAAAAAKAAoAAAISBBKGpnmOopy0WbZeo3ze/DkFADs=");
+        width:10px;
+        height:10px;
+        display:block;
+        position:relative;
+        background-color:#fafafa;
+        background-position:center center;
+        background-repeat:no-repeat;
+        color:#888;
+        border:solid #888 1px;
+        line-height:10px;
+        font-size:10px;
+        font-family:monospace;
+        text-align:center;
+        background-image:url("data:image/gif;base64,R0lGODlhCgAKAIABAD8/PwAAACH5BAEKAAEALAAAAAAKAAoAAAISBBKGpnmOopy0WbZeo3ze/DkFADs=");
 }
 .tk-paneSplitter-orientation-vertical .tk-paneSplitter-spacer{
-	left:50%;
-	margin-left:-5px;
-	border-top:none;
-	border-bottom:none;
+        left:50%;
+        margin-left:-5px;
+        border-top:none;
+        border-bottom:none;
 }
 .tk-paneSplitter-orientation-horizontal .tk-paneSplitter-spacer{
-	top:50%;
-	margin-top:-5px;
-	border-left:none;
-	border-right:none;
+        top:50%;
+        margin-top:-5px;
+        border-left:none;
+        border-right:none;
 }
 .tk-paneSplitter-orientation-vertical{
-	display:block;
-	border-right:none;
-	border-left:none;
+        display:block;
+        border-right:none;
+        border-left:none;
 }
 .tk-paneSplitter-orientation-horizontal{
-	display:-moz-inline-stack;
-	display:inline-block;
-	*display:inline;
-	vertical-align:middle;
-	border-top:none;
-	border-bottom:none;
+        display:-moz-inline-stack;
+        display:inline-block;
+        *display:inline;
+        vertical-align:middle;
+        border-top:none;
+        border-bottom:none;
 }
 
 .tk-paneSplitter-held{
-	cursor:move;
-	position:absolute;
-	width:99%;
-	height:99%;
+        cursor:move;
+        position:absolute;
+        width:99%;
+        height:99%;
 }
 
 .tk-splitpane{
-	overflow:hidden;
-	border:solid #ccc 1px;
+        overflow:hidden;
+        border:solid #ccc 1px;
+        white-space:nowrap;
 }
 .tk-splitpane-pane{
-	padding:0;
-	margin:0!important;
-	overflow:auto;
-	border-width:0;
+        padding:0;
+        margin:0!important;
+        overflow:auto;
+        border-width:0;
+        white-space:normal;
 }
 .tk-splitpane-pane.tk-splitpane{
-	overflow:hidden;
-	border-width:0;
-	padding:0;
+        overflow:hidden;
+        border-width:0;
+        padding:0;
+        white-space:nowrap;
 }
 .tk-splitpane-orientation-horizontal .tk-splitpane-pane{
-	zoom:1;
-	display:-moz-inline-stack;
-	display:inline-block;
-	*display:inline;
-	vertical-align:middle;
+        zoom:1;
+        display:-moz-inline-stack;
+        display:inline-block;
+        *display:inline;
+        vertical-align:middle;
 }
