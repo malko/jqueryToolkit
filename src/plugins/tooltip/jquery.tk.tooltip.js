@@ -4,6 +4,7 @@
 * @licence Dual licensed under the MIT / LGPL licenses.
 * @require tk.position
 * @changelog
+*            - 2010-10-15 - avoid to apply opacity when connector is true under ie ( ie handling of opacity make the connector to disappear)
 *            - 2010-08-30 - bugs correction regarding spacing and connector colors
 *                         - added method tipWrapper (used with return_tipWrapper)
 *                         - add option opacity;
@@ -26,7 +27,7 @@ $.toolkit('tk.tooltip',{
 	_init:function(){
 		var self = this,
 			ttipId = "tooltip_"+self.elmt.attr('id');
-		self._wrapper = $('<div class="tk-tooltip-wrapper tk-border tk-corner" role="tooltip" id="'+ttipId+'"><div class="tk-tooltip-msg"></div><div class="tk-pointer"><div class="tk-pointer-bg"><span></span></div></div></div>');
+		self._wrapper = $('<div class="tk-tooltip-wrapper tk-border tk-corner" role="tooltip" id="'+ttipId+'"><div class="tk-tooltip-msg"></div><div class="tk-pointer"><div class="tk-pointer-bg"><span>&nbsp;</span></div></div></div>');
 		self.elmt.attr("aria-describedby", ttipId);
 		self._msg = self._wrapper.find('.tk-tooltip-msg');
 		self._pointer=self._wrapper.find('.tk-pointer');
@@ -49,6 +50,9 @@ $.toolkit('tk.tooltip',{
 		return this._wrapper;
 	},
 	_set_opacity:function(o){
+		//-- ie 6~8 bug when using opacity with connector (connector won't display) so we disable opacity if connector is true and we are under ie
+		if( (! $.support.opacity) && this.options.connector )
+			return;
 		this._wrapper.css('opacity',o?o:1);
 	},
 	_set_stickyMouse:function(sticky){

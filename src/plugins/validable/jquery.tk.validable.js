@@ -25,6 +25,7 @@ formValidableOptions = {
 };
 $('#myForm').validable(formValidableOptions);
 @changelog
+ - 2010-10-05 - add mustValidate to required classNameOption
            - 2010-07-30 - validable_formGetState only trigger when initialized
            - 2010-06-30 - add getStateAutoScroll option
                         - getState on form now ignore disabled elements
@@ -43,13 +44,16 @@ $('#myForm').validable(formValidableOptions);
                         - add event validable_formGetState(event,elmt,state) emitted on form checking state; (stop submission if return false)
            - 2009-10-22 - add options helpTrigger and helpAfter
            - 2009-10-20 - add support for string callbacks
+@knownBugs
+ - trying to make validable a form with no id attribute but with an input named id will lead to problem under fucking buggy internet explorer
+   to workaround either use a different name for your input element or simply declare an id attribute to your form in the original html code
 */
 (function($) {
 	$.toolkit('tk.validable',{
 		_classNameOptions: {
 			getStateAutoScroll:'|noScroll|autoScroll',
 			alwaysSetState:'|all',
-			required:'|req|opt',
+			required:'|req|opt|mustValidate',
 			useIcon:'|noIcon|withIcon',
 			initCheck:'|noInitCheck',
 			stateElmt:'|self|label|none',
@@ -149,6 +153,8 @@ $('#myForm').validable(formValidableOptions);
 				required = true;
 			}else if( required === 'opt'){
 				required = false;
+			}else if( required==='mustValidate'){
+				required = -1;
 			}
 			required = required==-1?-1:(required?true:false); // ensure boolean value or -1
 			if( required !== true){
@@ -455,7 +461,7 @@ $('#myForm').validable(formValidableOptions);
 		, ualphanum:function(str){ return str.match(/^[0-9a-z_\s-]+$/)?true:false }
 		, uAlphanum:function(str){ return str.match(/^[0-9a-z_\s-]+$/i)?true:false }
 		, uALPHANUM:function(str){ return str.match(/^[0-9A-Z_\s-]+$/)?true:false }
-		, confirm:function(v){ return $($(this).attr('rel')).val()===v?true:false }
+		, confirm:function(v){ var val = $($(this).attr('rel')).val(); return ( val==='' || val===v)?true:false; }
 		, img:/\.(jpe?g|gif|png)$/i
 		, video:/\.(mpe?g|avi|flv|mov)$/i
 		, flashEmbeddable:/\.(jpe?g|flv|gif|png|swf|mp3)$/i
