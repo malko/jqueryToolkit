@@ -12,6 +12,9 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2011-03-16 - add new toolkit methods: loadScript() and getScriptPath()
+              - now initPlugins will try to autoload missing tk-plugins
+ - 2011-02-14 - now initPlugins can take context as third arguments.
  - 2010-11-02 - add new selector :textnode and add textChildren method to jquery
  - 2010-11-01 - make _tk property an exposed property of constructor and make it more easy to extend
               - make a little change in _readClassNameOpts to allow usage of submasks and assertions in _classNameOptions expressions
@@ -341,16 +344,28 @@ $.toolkit.plugin.prototype = {
 };
 
 //-- TOOLKIT HELPER METHODS --//
-$.toolkit.initPlugins = function(pluginNames,nameSpace){
+/**
+* initialise plugins of pluginName for the given nameSpace and context.
+* So all elements in the dom that have a class nameSpace-pluginName will be initialized.
+* if nameSpace is tk and pluginName isn't loaded then it will try to load it dynamicly before initialization.
+* @param string pluginNames may be a single plugin name or a list of pluginNames separated by |
+*                           if 'all' or empty string '' is passed then will try to init all plugins
+*                           found in the given nameSpace
+* @param string nameSpace   the plugin nameSpace to initialize default to 'tk' if empty
+* @param jQueryContext context the context to limit the initialization on (default to the entire document)
+* @return void
+*/
+$.toolkit.initPlugins = function(pluginNames,nameSpace,context){
 	if(! nameSpace){
 		nameSpace = 'tk';
+		if( ! $.tk ){ $.tk={}; }
 	}
 	if( pluginNames == '' ){
 		pluginNames = 'all';
 	}
 	if(typeof pluginNames === 'string'){
 		if( pluginNames !=='all'){
-		pluginNames = pluginNames.split(/[|,]/);
+			pluginNames = pluginNames.split(/[|,]/);
 		}else{ //-- try to init all loaded plugins
 			pluginNames = [];
 			for( var i in $[nameSpace]){
@@ -358,15 +373,105 @@ $.toolkit.initPlugins = function(pluginNames,nameSpace){
 			}
 		}
 	}
+	var p,pUri;
 	for( var i=0,l=pluginNames.length,p='';i<l;i++){
 		p=pluginNames[i];
+		if( nameSpace ==='tk' && ! $[nameSpace][p] ){ // try to auto load tk plugins
+			pUri = $.toolkit.getScriptPath('jquery\\.toolkit(-[\\d\.-]+)?(\\.min)?\\.js');
+			if(pUri===false){
+				continue;
+			}else{
+				pUri += "plugins/"+p+"/jquery.tk."+p+".js";
+				//-- try to load css if exists
+				$.toolkit.loadScript(pUri.replace(/\.js$/,'.css'));
+				$.toolkit.loadScript(pUri,function(){
+					if( $.tk[p] && $.isFunction($.tk[p].initPlugin)){
+						$.tk[p].initPlugin(context);
+					}else{
+						new Function("c","jQuery('.tk-"+p+"',c)."+p+"()")(context);
+					}
+				},'$.tk.'+p);
+				continue;
+			}
+		}
 		if( $[nameSpace] && $[nameSpace][p] && $.isFunction($[nameSpace][p].initPlugin)){
-			$[nameSpace][p].initPlugin();
+			$[nameSpace][p].initPlugin(context);
 		}else{
-			new Function("jQuery('."+nameSpace+"-"+p+"')."+p+"()")();
+			new Function("c","jQuery('."+nameSpace+"-"+p+"',c)."+p+"()")(context);
 		}
 	}
 };
+
+$.toolkit.getScriptPath=function(scriptName){
+	if( typeof $.toolkit.__scriptPaths ==="undefined"){
+		$.toolkit.__scriptPaths = {};
+	}else if(typeof $.toolkit.__scriptPaths[scriptName] !== undefined){
+		return $.toolkit.__scriptPaths[scriptName];
+	}
+	var type = scriptName.match(/\.css$/)?'link[type=text/css]':'script[src]'
+		, scripts = $(type)
+		, scriptExp = new RegExp(scriptName+'$')
+	;
+	$.toolkit.__scriptPaths[scriptName] = false;
+	scripts.each(function(){
+		if( this.src.match(scriptExp) ){
+			$.toolkit.__scriptPaths[scriptName] = this.src.replace(scriptExp,'');
+			return false; //break;
+		}
+	});
+	return $.toolkit.__scriptPaths[scriptName];
+}
+$.toolkit.loadScript = function(uri,callback,waitFor){
+	if( typeof uri == 'Array' ){
+		for(var i=0,l=uri.length;i<l;i++){
+			$.toolkit.loadScript.apply(this,uri);
+		}
+		return;
+	}
+	if( typeof callback ==='Array'){
+		callbacks = callback;
+		callback = function(){
+			$.toolkit.loadScript.apply(null,callbacks);
+		}
+	}
+	if(eval("typeof " + waitFor) !== 'undefined' && callback){
+		return callback();
+	}
+	var parent = document[document.head?'head':'body']
+		, elmt = uri.match(/\.css$/)?'link':'script'
+		, type = 'text/'+(elmt==="link"?'css':'javascript')
+	;
+	if( elmt==='link'){
+		elmt = document.createElement(elmt);
+		elmt.rel = 'stylesheet';
+		elmt.href=uri;
+	}else{
+		elmt = document.createElement(elmt);
+		elmt.src=uri;
+	}
+	if( callback ){
+		if( waitFor ){
+			var interval = setInterval(function(){
+				if(eval("typeof " + waitFor) !== 'undefined'){
+					clearInterval(interval);
+					callback();
+				}
+			},50);
+		}else{
+			if( s.onreadystatechange===null ){
+				s.onreadystatechange = function(){
+					if( s.readyState === 'complete' || s.readyState === 'loaded' )
+						s.onreadystatechange=null;
+						callback();
+				}
+			}else{
+				s.onload=callback;
+			}
+		}
+	}
+	parent.appendChild(elmt);
+	return;
+}
 /**
 * allow to be sure to get a plugin instance from plugin instance or element on which the plugin is applyied.
 * @param object  elmt         the pluginInstance or the element we want the plugin instance of
@@ -474,7 +579,7 @@ $.extend($.fn,{
 			if( undefined === id){
 				return ;
 			}
-			if( id.length < 1){
+			if( typeof id !== 'object' && id.length < 1 ){
 				e.attr('id',$.toolkit.requestUniqueId());
 			}
 		});
