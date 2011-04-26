@@ -149,7 +149,7 @@
 }
 .tk-state-normal{
   background:#eee;
-  border-color:#333 !important;
+  border-color:#888 !important;
   color:#555;
 }
 .tk-state-warning {
@@ -176,4 +176,20 @@
   background:#eee !important;
   border-color:#bbb !important;
   color:#999 !important;
+	cursor:default !important;
+}
+.tk-state-active{
+  background:#fcfcfc;
+  border-color:#555 !important;
+  color:#333;
+}
+.tk-state-hover{
+  background:#e0e0e0 !important;
+  border-color:#666 !important;
+  color:#444 !important;
+}
+.tk-state-focus{
+	-moz-box-shadow:0 0 .2em #f90;
+	-webkit-box-shadow:0 0 .2em #f90;
+	box-shadow:0 0 .2em #f90;
 }

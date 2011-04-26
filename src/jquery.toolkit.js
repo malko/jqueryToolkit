@@ -12,6 +12,9 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2011-03-27 - _removeClassExp() now can work on jquery element set, tkSetState() now work with states groups and allow a second parameter dontOverride
+ - 2011-03-23 - plugins._trigger() method now use window.event as a default event if none is passed
+ - 2011-03-21 - add new plugin method _bind() to ease event binding
  - 2011-03-16 - add new toolkit methods: loadScript() and getScriptPath()
               - now initPlugins will try to autoload missing tk-plugins
  - 2011-02-14 - now initPlugins can take context as third arguments.
@@ -271,6 +274,10 @@ $.toolkit.plugin.prototype = {
 		return this;
 	},
 	//-- event management --//
+	_bind:function(eventName,callback){
+		this.elmt.bind(eventName.replace(/(\s+|$)/g,'.'+this._tk.pluginName+'$1'),callback);
+		return this;
+	},
 	_trigger: function(eventName, originalEvent, params){
 		if( undefined===params){
 			params = [this.elmt];
@@ -290,7 +297,7 @@ $.toolkit.plugin.prototype = {
 		copy original event properties over to the new event
 		this would happen if we could call $.event.fix instead of $.Event
 		but we don't have a way to force an event to be fixed multiple times*/
-		var e = $.Event(originalEvent);
+		var e = $.Event(originalEvent||window.event); //-- toolkit add window.event as a default originalEvent
 		if ( e.originalEvent ) {
 			for ( var i = $.event.props.length, prop; i; ) {
 				prop = $.event.props[ --i ];
@@ -549,11 +556,15 @@ $.toolkit._readClassNameOpts=function(elmt,baseClass,optionsList){
 */
 $.toolkit._removeClassExp = function(elmt,exp,add){
 	elmt=$(elmt);
+	if( elmt.length > 1){
+		return elmt.each(function(){$.toolkit._removeClassExp(this,exp,add);});
+	}
 	var classAttr = elmt.attr('class');
 	if( classAttr ){
 		exp = new RegExp('(?:^|\\s)'+exp.replace(/\*/g,'[a-zA-Z_0-9_-]*')+'(?=$|\\s)','g');
 		elmt.attr('class',classAttr.replace(exp,''));
 	}
+	//- dbg(add,classAttr,elmt.attr('class'))
 	if( undefined!==add ){
 		elmt.addClass(add);
 	}
@@ -591,9 +602,18 @@ $.extend($.fn,{
 		.toggleClass("tk-state-disabled",state);
 		return this;
 	},
-	tkSetState:function(state){
-		$.toolkit._removeClassExp(this,'tk-state-*','tk-state-'+state);
-		return this;
+	tkSetState:function(state,dontOverride){
+		var stateGroups = ['normal|info|error|success|warning','disabled|active|focus|hover'],i,l;
+		for(i=0,l=stateGroups.length;i<l;i++){
+			if( stateGroups[i].match(state) ){
+				if( dontOverride && this.attr('class').match(new RegExp('(?:^|\\s)tk-state-('+stateGroups[i]+')(?=$|\\s)')))
+					return this;
+				return $.toolkit._removeClassExp(this,'tk-state-('+stateGroups[i]+')','tk-state-'+state);	
+			}
+		}
+		if( dontOverride && this.attr('class').match(/(?:^|\s)tk-state-[a-zA-Z_0-9_-]+(?=$|\s)/))
+			return this;
+		return this._removeClassExp(this,'tk-state-(?!'+stateGroups.join('|')+')*','tk-state-'+state);
 	},
 	textChildren: function(){
 		var res = [],childs=this.attr('childNodes'),i,l;
