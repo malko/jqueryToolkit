@@ -4,6 +4,7 @@
 * @licence Dual licensed under the MIT / LGPL licenses.
 * @require tk.position
 * @changelog
+*            - 2011-03-18 - allow callback function for hideMethod and showMethod
 *            - 2010-10-15 - avoid to apply opacity when connector is true under ie ( ie handling of opacity make the connector to disappear)
 *            - 2010-08-30 - bugs correction regarding spacing and connector colors
 *                         - added method tipWrapper (used with return_tipWrapper)
@@ -123,6 +124,7 @@ $.toolkit('tk.tooltip',{
 		if( this._tk.initialized && c){
 			this._setPointerColor(this.options.connector=c);
 		}
+		return c;
 	},
 	_set_msg:function(msg){
 		if( msg.toString().length < 1){
@@ -205,6 +207,8 @@ $.toolkit('tk.tooltip',{
 		}
 		if( typeof(this.options.showMethod) === 'string'){
 			this._wrapper[this.options.showMethod]();
+		}else if( $.isFunction(this.options.showMethod) ){
+			this.options.showMethod.call(this._wrapper,event);
 		}else{
 			this._wrapper[this.options.showMethod[0]](this.options.showMethod[1]);
 		}
@@ -221,6 +225,8 @@ $.toolkit('tk.tooltip',{
 		}
 		if( typeof(this.options.hideMethod) === 'string'){
 			this._wrapper[this.options.hideMethod]();
+		}else if( $.isFunction(this.options.hideMethod) ){
+			this.options.hideMethod.call(this._wrapper,event);
 		}else{
 			this._wrapper[this.options.hideMethod[0]](this.options.hideMethod[1]);
 		}

@@ -3,6 +3,7 @@
 	allow an element to be positioned at the given offset setting its position handler.
 	be aware that margin are taken into consideration when positionning the element.
 	@changelog
+		- 2011-03-18 - add mousemove binding to frame/iframe when mouseRelative is binded.
 		- 2010-06-23 - add some NaN check that can crash the script under ie
 */
 $.toolkit('tk.positionable',{
@@ -501,9 +502,19 @@ $.toolkit.mouseRelative={
 		for( id in self._traking){ needed = true;break; }
 		if( self._binded && ! needed){
 			$(window).unbind('mousemove.mouseRelative');
+			$('iframe,frame').each(function(){ $(this.contentDocument||this.contentWindow.document).unbind('mousemove.mouseRelative'); });
 			self._binded = false;
 		}else if( needed && ! self._binded ){
 			$(window).bind('mousemove.mouseRelative',(function(e){self.update(e);	}));
+			$('iframe,frame').each(function(){
+				var iframe = this;
+				$(iframe.contentDocument||iframe.contentWindow.document).bind('mousemove.mouseRelative',function(e){
+					var i = $(iframe),o=$(iframe).offset();
+					e.pageX += o.left-($.browser.msie?$(window).scrollLeft():0);
+					e.pageY += o.top-($.browser.msie?$(window).scrollTop():0);
+					self.update(e);
+				});
+			});
 			self._binded = true;
 		}
 	},
