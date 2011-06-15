@@ -12,6 +12,7 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2011-06-15 - $.toolkit.requestUniqueId wondow.top bug if embeded in frame from external domain resolved
  - 2011-03-27 - _removeClassExp() now can work on jquery element set, tkSetState() now work with states groups and allow a second parameter dontOverride
  - 2011-03-23 - plugins._trigger() method now use window.event as a default event if none is passed
  - 2011-03-21 - add new plugin method _bind() to ease event binding
@@ -575,10 +576,8 @@ $.toolkit._removeClassExp = function(elmt,exp,add){
 * return a unique id for element
 */
 $.toolkit.requestUniqueId = function(){
-	if( window.top.jQuery && window.top.jQuery.toolkit && window.top.jQuery.toolkit._uniqueId )
-		return 'tkUID'+(++window.top.jQuery.toolkit._uniqueId);
-	window.top.jQuery.toolkit._uniqueId=1;
-	return 'tkUID'+window.top.jQuery.toolkit._uniqueId;
+	var tk = ( window.top.jQuery && window.top.jQuery.toolkit) ? window.top.jQuery.toolkit : window.jQuery.toolkit;
+	return 'tkUID'+ (( tk._uniqueId && uIdContainer._uniqueId++ ) || (tk._uniqueId = 1));
 }
 
 //-- some jquery methods extensions
