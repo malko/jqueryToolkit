@@ -12,6 +12,7 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2011-07-06 - $.toolkit.requestUniqueId bug that make return twice tkUID1 solved
  - 2011-06-15 - $.toolkit.requestUniqueId window.top bug if embeded in frame from external domain resolved
  - 2011-03-27 - _removeClassExp() now can work on jquery element set, tkSetState() now work with states groups and allow a second parameter dontOverride
  - 2011-03-23 - plugins._trigger() method now use window.event as a default event if none is passed
@@ -565,7 +566,6 @@ $.toolkit._removeClassExp = function(elmt,exp,add){
 		exp = new RegExp('(?:^|\\s)'+exp.replace(/\*/g,'[a-zA-Z_0-9_-]*')+'(?=$|\\s)','g');
 		elmt.attr('class',classAttr.replace(exp,''));
 	}
-	//- dbg(add,classAttr,elmt.attr('class'))
 	if( undefined!==add ){
 		elmt.addClass(add);
 	}
@@ -577,7 +577,7 @@ $.toolkit._removeClassExp = function(elmt,exp,add){
 */
 $.toolkit.requestUniqueId = function(){
 	var tk = ( window.top.jQuery && window.top.jQuery.toolkit) ? window.top.jQuery.toolkit : window.jQuery.toolkit;
-	return 'tkUID'+ (( tk._uniqueId && tk._uniqueId++ ) || (tk._uniqueId = 1));
+	return 'tkUID'+ (( tk._uniqueId && ++tk._uniqueId ) || (tk._uniqueId = 1));
 }
 
 //-- some jquery methods extensions
