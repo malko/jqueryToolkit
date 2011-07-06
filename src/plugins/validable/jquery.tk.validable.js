@@ -445,6 +445,7 @@ $('#myForm').validable(formValidableOptions);
 
 	$.tk.validable.defaultRules={
 		email:/^[^@\s]+@[^@\s]+\.[a-z]{2,5}$/
+		, url:/^https?:\/\/[^\.\/]+\.[^\.\/]+/
 		, 'int':/^\d+$/
 		, 'float':/^\d+((\.|,)\d+)?$/
 		, zipcode:/^\d{2,5}$/
