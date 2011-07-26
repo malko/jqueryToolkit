@@ -12,6 +12,7 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2011-07-26 - $.toolkit.requestUniqueId window.top bug on FF if embeded in frame from external domain finally resolved
  - 2011-07-06 - $.toolkit.requestUniqueId bug that make return twice tkUID1 solved
  - 2011-06-15 - $.toolkit.requestUniqueId window.top bug if embeded in frame from external domain resolved
  - 2011-03-27 - _removeClassExp() now can work on jquery element set, tkSetState() now work with states groups and allow a second parameter dontOverride
@@ -576,7 +577,12 @@ $.toolkit._removeClassExp = function(elmt,exp,add){
 * return a unique id for element
 */
 $.toolkit.requestUniqueId = function(){
-	var tk = ( window.top.jQuery && window.top.jQuery.toolkit) ? window.top.jQuery.toolkit : window.jQuery.toolkit;
+	var tk;
+	try{
+		tk = window.top.jQuery.toolkit;
+	}catch(e){
+		tk = window.jQuery.toolkit;
+	}
 	return 'tkUID'+ (( tk._uniqueId && ++tk._uniqueId ) || (tk._uniqueId = 1));
 }
 
@@ -607,7 +613,7 @@ $.extend($.fn,{
 			if( stateGroups[i].match(state) ){
 				if( dontOverride && this.attr('class').match(new RegExp('(?:^|\\s)tk-state-('+stateGroups[i]+')(?=$|\\s)')))
 					return this;
-				return $.toolkit._removeClassExp(this,'tk-state-('+stateGroups[i]+')','tk-state-'+state);	
+				return $.toolkit._removeClassExp(this,'tk-state-('+stateGroups[i]+')','tk-state-'+state);
 			}
 		}
 		if( dontOverride && this.attr('class').match(/(?:^|\s)tk-state-[a-zA-Z_0-9_-]+(?=$|\s)/))
