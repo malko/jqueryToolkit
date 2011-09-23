@@ -12,6 +12,7 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2011-09-23 - add $.toolkit.mediaQuery for css media Queries detection
  - 2011-07-26 - $.toolkit.requestUniqueId window.top bug on FF if embeded in frame from external domain finally resolved
  - 2011-07-06 - $.toolkit.requestUniqueId bug that make return twice tkUID1 solved
  - 2011-06-15 - $.toolkit.requestUniqueId window.top bug if embeded in frame from external domain resolved
@@ -585,6 +586,26 @@ $.toolkit.requestUniqueId = function(){
 	}
 	return 'tkUID'+ (( tk._uniqueId && ++tk._uniqueId ) || (tk._uniqueId = 1));
 }
+
+/**
+* allow to test css media queries
+* exemples: $.toolkit.mediaQuery('screen') or $.toolkit.mediaQuery('screen and (orientation:landscape)')
+* @param string query the query you want to test
+* @param bool   noCache if true then won't use cached results
+* @return bool
+*/
+$.toolkit.mediaQuery = function(query,noCache){
+	if(! $.toolkit.mediaQuery.cache){
+		$.toolkit.mediaQuery.cache = {};
+	}
+	if( query in $.toolkit.mediaQuery.cache && ! noCache )
+		return $.toolkit.mediaQuery.cache[query];
+
+	var test = $('<div><style type="text/css">@media '+query+'{#tkMediaQueryTest{position:absolute;} }</style><div id="tkMediaQueryTest"></div></div>');
+	$.toolkit.mediaQuery.cache[query] =  (test.appendTo('body').find('#tkMediaQueryTest').css('position')==='absolute' ?true:false);
+	test.remove();
+	return $.toolkit.mediaQuery.cache[query];
+};
 
 //-- some jquery methods extensions
 $.extend($.fn,{
