@@ -231,7 +231,7 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 			if( ! nodes ){ nodes = this.nodes; }
 			if(! nodes.rect ){ nodes.rect = this.rect; }
 			if(! nodes.sum ){ this._sum(nodes); }
-			divideArea(nodes);
+			divideArea.call(this,nodes);
 			//console.debug('nodes',nodes);
 		}
 	});
