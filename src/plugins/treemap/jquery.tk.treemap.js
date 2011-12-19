@@ -31,7 +31,7 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 
 	// -> start of d3.js code adaptation (be aware this point to the plugin instance most of the time)
 	var goldenNumber = 0.5 * (1 + Math.sqrt(5))
-		,divideArea = function(nodes){
+		,divideArea = function(nodes,valueAccessorMethod){
 			if(nodes && nodes.length) {
 				var row = []
 					, rect = $.extend({},nodes.rect)
@@ -43,7 +43,7 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 					, l
 					, i
 				;
-				scale.call(this,remaining, rect.width * rect.height / (nodes.sum || this._sum(nodes)));
+				scale(remaining, rect.width * rect.height / nodes.sum, valueAccessorMethod );
 				row.area = 0;
 				while ((l = remaining.length) > 0) {
 					row.push( node = remaining[l-1]);
@@ -64,14 +64,11 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 					row.length = row.area = 0;
 				}
 			}
-			for(i=0,l=nodes.length; i<l; i++){
-				if( nodes[i]._tmarea>0)this.drawNode(nodes[i]);
-			}
 		}
 		// Compute the area for each child based on value & scale.
-		,scale = function scale(nodes, scaleFactor){
+		,scale = function scale(nodes, scaleFactor, valueAccessorMethod){
 			for( var i=0, l=nodes.length, area; i<l; i++ ){
-				area = this._getNodeValue(nodes[i]) * (scaleFactor<0 ? 0 : scaleFactor);
+				area = ( valueAccessorMethod ? valueAccessorMethod(nodes[i]) : nodes[i].value )  * (scaleFactor<0 ? 0 : scaleFactor);
 				nodes[i]._tmarea = isNaN(area) || (area<=0 ? 0 : area);
 			}
 		}
@@ -139,19 +136,12 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 	;
 
 	$.toolkit('tk.treemap',{
-		rect:{
-			top:0
-			,left:0
-			,width:0
-			,height:0
-		}
-		,nodes:[]
+		nodes:[]
 		,_init:function(){
 			// ensure parent element to be a position reference
 			this.elmt.css('position')=='static' && this.elmt.css('position','relative');
-			this.resetRect();
 			this._applyOpts('sort|datas');
-			this.squarify();
+			this.render();
 		}
 		,_getNodeValue:function(node){
 			switch(typeof this.options.value){
@@ -174,23 +164,18 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 			}
 		}
 		,_sum:function(nodes){
-			if( undefined===nodes){
-				this.nodes.sum =  this._sum(this.nodes);
-				return this.nodes.sum;
-			}
 			var tot = 0;
-			for(var i=0,l=nodes.length;i<l;i++){
-				tot += this._getNodeValue(nodes[i]);
+			for(var i=0,l=this.nodes.length;i<l;i++){
+				tot += this._getNodeValue(this.nodes[i]);
 			}
-			nodes.sum = tot;
+			this.nodes.sum = tot;
 			return tot;
 		}
 		,_set_value:function(v){
 			this.options.value = v;
-			this._sum();
 			if( this._tk.initialized ){
-				this.nodes.sort(this.options.sort);
-				this.squarify();
+				this.options.value = v;
+				this.render();
 			}
 			return v;
 		}
@@ -201,38 +186,60 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 				})(this);
 			}
 			if( this._tk.initialized ){
-				this.nodes.sort(this.options.sort);
-				this.squarify();
+				this.options.sort = sort;
+				this.render();
 			}
 			return sort;
 		}
 		,_set_datas:function(datas){
-			this.nodes = $.extend([],datas).sort(this.options.sort);
-			this.nodes.rect = this.rect;
-			this._sum(this.nodes)
+			if( this.nodes ){
+				for( var i=0,l=this.nodes.length;i<l;i++){
+					if( this.nodes[i]._tmelmt ){
+						this.nodes[i]._tmelmt.remove();
+						delete this.nodes[i]._tmelmt;
+					}
+				}
+			}
+			this.elmt.children().remove();
+			this.nodes = $.extend([],datas);
 			if( this._tk.initialized ){
-				this.nodes.sort(this.options.sort);
-				this.squarify();
+				this.render();
 			}
 		}
-		,resetRect:function(){
-			this.rect={
-				top:0//this.elmt.css('paddingTop')
-				,left:0//this.elmt.css('paddingLeft')
-				,width:this.elmt.innerWidth()
-				,height:this.elmt.innerHeight()
+		,render:function(){
+			var self=this;
+			// this.elmt area definition
+			self.nodes.rect={
+				top: Math.round((self.elmt.height()-self.elmt.innerHeight()) / 2)
+				,left:Math.round(( self.elmt.width()-self.elmt.innerWidth()) / 2)
+				,width:self.elmt.innerWidth()
+				,height:self.elmt.innerHeight()||self.elmt.innerWidth()/goldenNumber
 			}
-			this.nodes.rect = this.rect;
-			if( this._tk.initialized ){
-				this.nodes.sort(sort);
+			self._sum();
+			self.nodes.sort(this.options.sort);
+			divideArea(self.nodes,function(n){ return self._getNodeValue(n); });
+			for(var i=0,l=self.nodes.length; i<l; i++){
+				if( self.nodes[i]._tmarea>0){
+					self._drawNode(self.nodes[i],i);
+				}
 			}
 		}
-		,squarify:function(nodes){
-			if( ! nodes ){ nodes = this.nodes; }
-			if(! nodes.rect ){ nodes.rect = this.rect; }
-			if(! nodes.sum ){ this._sum(nodes); }
-			divideArea.call(this,nodes);
-			//console.debug('nodes',nodes);
+		,_drawNode:function(node,nodePosition){
+			if(! node._tmelmt ){
+				node._tmelmt = $('<div class="tk-treemap-node"></div>').appendTo(this.elmt);
+			}
+			//-- execute user drawNode method
+			node._tmelmt.html(this._getNodeLabel(node));
+			if( this.options.drawNode ){
+				if( false===this.options.drawNode.call(node._tmelmt[0],node,node._tmrect,nodePosition)){
+					return false;
+				}
+			}
+			if( this.options.animDuration > 0){
+				node._tmelmt.animate(node._tmrect,this.options.animDuration,this.options.animEasing);
+			}else{
+				node._tmelmt.css(node._tmrect);
+			}
 		}
 	});
 
@@ -243,7 +250,13 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 		,animDuration:750
 		,animEasing:'swing'
 		,sort:null // default to use the value accessor for sorting
-		,drawNode:null // may be a callback function called at draw time, will receive actual jquery node element as this and nodeDatas as first parameter. (will be called between labeling and positionning the cell)
+		/**
+		may be a callback function called at draw time,
+		will receive actual node domElement as this and nodeDatas as first parameter. (will be called between labeling and positionning the cell)
+		returning false will avoid default positioning so you must do it yourself in such case (usefull to define more complex animations)
+		function drawNode(node,rect,nodeposition)
+		*/
+		,drawNode:null
 	}
 })(jQuery);
 
@@ -296,21 +309,5 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 			}
 			this.divideArea(part0);
 			this.divideArea(part1);
-		}
-		,_drawNode:function(node){
-			//console.debug('draw',node.id,node);
-			if(! node._tmelmt ){
-				node._tmelmt = $('<div class="tk-treemap-node"></div>').appendTo(this.elmt);
-			}
-			//-- execute user drawNode method
-			node._tmelmt.html(this._getNodeLabel(node));
-			if( this.options.drawNode ){
-				this.options.drawNode.call(node._tmelmt,node);
-			}
-			if( this.options.animDuration > 0){
-				node._tmelmt.animate(node._tmrect,this.options.animDuration,this.options.animEasing);
-			}else{
-				node._tmelmt.css(node._tmrect);
-			}
 		}
 */
