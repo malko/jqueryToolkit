@@ -1,0 +1,14 @@
+.tk-treemap{
+	display:block;
+	padding:0;
+	font-size:12px;
+}
+.tk-treemap-node{
+	position: absolute;
+	top:0;
+	left:0;
+	overflow: hidden;
+	background:#888;
+	color:#fff;
+	text-align: center;
+}
