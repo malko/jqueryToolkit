@@ -43,7 +43,7 @@ Some other contributors of the original code : Squarified Treemaps by Mark Bruls
 					, l
 					, i
 				;
-				scale(remaining, rect.width * rect.height / (nodes.sum || this._sum(nodes)));
+				scale.call(this,remaining, rect.width * rect.height / (nodes.sum || this._sum(nodes)));
 				row.area = 0;
 				while ((l = remaining.length) > 0) {
 					row.push( node = remaining[l-1]);
