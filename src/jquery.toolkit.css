@@ -148,43 +148,43 @@
 	font-weight:bold;
 }
 .tk-state-normal{
-  background:#eee;
+  background-color:#eee;
   border-color:#888 !important;
   color:#555;
 }
 .tk-state-warning {
-  background:#ffb;
+  background-color:#ffb;
   border-color:#fb4 !important;
   color:#950;
 }
 .tk-state-error{
-	background:#fee;
+	background-color:#fee;
 	border-color:#b44 !important;
 	color:#922;
 }
 .tk-state-success{
-	background:#efe;
+	background-color:#efe;
 	border-color:#4b4 !important;
 	color:#292;
 }
 .tk-state-info{
-	background:#eef;
+	background-color:#eef;
 	border-color:#33f !important;
 	color:#229;
 }
 .tk-state-disabled{
-  background:#eee !important;
+  background-color:#eee !important;
   border-color:#bbb !important;
   color:#999 !important;
 	cursor:default !important;
 }
 .tk-state-active{
-  background:#fcfcfc;
+  background-color:#fcfcfc;
   border-color:#555 !important;
   color:#333;
 }
 .tk-state-hover{
-  background:#e0e0e0 !important;
+  background-color:#e0e0e0 !important;
   border-color:#666 !important;
   color:#444 !important;
 }

@@ -12,6 +12,7 @@ was really missing to better stick to my way of doing things so i start this new
 @licence Dual licensed under the MIT / GPL licenses.
 
 @changelog
+ - 2011-12-20 - make jQuery.fn.prop point to jQuery.fn.attr when not exists as a quick old jquery version compatibility fix
  - 2011-09-23 - add $.toolkit.mediaQuery for css media Queries detection
  - 2011-07-26 - $.toolkit.requestUniqueId window.top bug on FF if embeded in frame from external domain finally resolved
  - 2011-07-06 - $.toolkit.requestUniqueId bug that make return twice tkUID1 solved
@@ -46,8 +47,11 @@ was really missing to better stick to my way of doing things so i start this new
 (function($){
 
 	var _dbg_ = true,
-		_throwOnBadCall=true;
-
+		_throwOnBadCall=true
+	;
+	if(! $.fn.prop){ //-- old jquery version compat for missing prop method
+		$.fn.prop = $.fn.attr;
+	}
 	window.dbg = function(){
 		if(! _dbg_ ){
 			return false;
@@ -66,12 +70,12 @@ was really missing to better stick to my way of doing things so i start this new
 			,i
 			,_dbg=function(a){
 				var i,s = [];
-				if( typeof(a)=='object'){
+				if( a instanceof Array ){
+					for( i=0;i<a.length;i++ ){ s.push( typeof(a[i])==='object' ? _dbg(a[i]) : a[i] ); }
+					return '['+s.join(', ')+']';
+				}else if( typeof(a)==='object'){
 					for( i in a ){ s.push( i+':'+_dbg(a[i])); }
 					return '{'+s.join(', ')+'}';
-				}else if (typeof(a)=='array'){
-					for( i=0;i<a.length;i++ ){ s.push((typeof(a[i])==='object' || typeof(a[i])==='array' )?_dbg(a[i]):a[i]); }
-					return '['+s.join(', ')+']';
 				}
 				return a;
 			};
@@ -126,15 +130,15 @@ $.toolkit = function(pluginName,basePlugin,prototype){
 
 		if( self._storableOptions && (! self.options.disableStorage) && $.toolkit.storage && $.toolkit.storage.enable() ){
 			if( self._storableOptions.pluginLevel ){
-				var v = '',pStored=self._storableOptions.pluginLevel.split(/[,\|]/);
+				var oV = '',pStored=self._storableOptions.pluginLevel.split(/[,\|]/);
 				for(var i=0;i<pStored.length;i++ ){
-					v = $.toolkit.storage.get(self._tk.pluginName+'_'+pStored[i]);
-					if( null !== v){
-						self.options[pStored[i]]=v;
+					oV = $.toolkit.storage.get(self._tk.pluginName+'_'+pStored[i]);
+					if( null !== oV){
+						self.options[pStored[i]]=oV;
 					}
 				}
 			}
-			var id = self.elmt.attr('id'),
+			var id = self.elmt.prop('id'),
 			v ='',eStored='',encodedUri=escape(window.location.href);
 			if( id && self._storableOptions.elementLevel){
 				eStored=self._storableOptions.elementLevel.split(/[,\|]/);
@@ -162,9 +166,9 @@ $.toolkit = function(pluginName,basePlugin,prototype){
 		self._tk.initialized=true;
 	};
 	//-- extends plugin methods
-	basePlugin = new basePlugin;
+	basePlugin = new basePlugin();
 	if(! ( basePlugin	instanceof $.toolkit.plugin) ){
-		basePlugin = $.extend(true,new $.toolkit.plugin,basePlugin);
+		basePlugin = $.extend(true,new $.toolkit.plugin(),basePlugin);
 	}
 	$[nameSpace][pluginName].prototype = basePlugin;
 	$.extend(true,$[nameSpace][pluginName].prototype,prototype);
@@ -183,13 +187,13 @@ $.toolkit = function(pluginName,basePlugin,prototype){
 	},prototype._tk||{});
 	//-- expose plugin function to the world
 	$.fn[pluginName] = function(){
-		var method = null,propName=null,onlyOne=false;
+		var method = null,propName=null,onlyOne=false,ret=false;
 		if( typeof arguments[0] === "string"){
 			method = Array.prototype.shift.call(arguments,1);
 			if( method.match(/^_/)){ //-- avoid call to pseudo private methods
 				return this;
 			}
-			var ret = method.match(/^(get|return)/)?true:false;
+			ret = method.match(/^(get|return)/)?true:false;
 			if(! $.isFunction($[nameSpace][pluginName].prototype[method]) ){
 				var match = method.match(/^([sg]et|return)(1)?(?:_+(.*))?$/);
 				if( null === match){
@@ -330,7 +334,7 @@ $.toolkit.plugin.prototype = {
 			for( k in key){
 				this.set(k,key[k]);
 			}
-			return;
+			return this;
 		}
 		if( $.isFunction(this['_set_'+key]) ){
 			var v = this['_set_'+key](value);
@@ -346,11 +350,12 @@ $.toolkit.plugin.prototype = {
 			if( this._storableOptions.pluginLevel && this._storableOptions.pluginLevel.match(exp) ){
 				$.toolkit.storage.set(this._tk.pluginName+'_'+key,value);
 			}else if( this._storableOptions.elementLevel && this._storableOptions.elementLevel.match(exp) ){
-				$.toolkit.storage.set(this._tk.pluginName+'_'+key+'_'+this.elmt.attr('id'),value);
+				$.toolkit.storage.set(this._tk.pluginName+'_'+key+'_'+this.elmt.prop('id'),value);
 			}else if( this._storableOptions.urlElementLevel && this._storableOptions.urlElementLevel.match(exp) ){
-				$.toolkit.storage.set(this._tk.pluginName+'_'+key+'_'+this.elmt.attr('id')+'_'+escape(window.location.href),value);
+				$.toolkit.storage.set(this._tk.pluginName+'_'+key+'_'+this.elmt.prop('id')+'_'+escape(window.location.href),value);
 			}
 		}
+		return this;
 	}
 };
 
@@ -371,7 +376,7 @@ $.toolkit.initPlugins = function(pluginNames,nameSpace,context){
 		nameSpace = 'tk';
 		if( ! $.tk ){ $.tk={}; }
 	}
-	if( pluginNames == '' ){
+	if( pluginNames === '' || undefined = pluginNames){
 		pluginNames = 'all';
 	}
 	if(typeof pluginNames === 'string'){
@@ -431,19 +436,19 @@ $.toolkit.getScriptPath=function(scriptName){
 		}
 	});
 	return $.toolkit.__scriptPaths[scriptName];
-}
+};
 $.toolkit.loadScript = function(uri,callback,waitFor){
-	if( typeof uri == 'Array' ){
+	if( uri instanceof Array ){
 		for(var i=0,l=uri.length;i<l;i++){
 			$.toolkit.loadScript.apply(this,uri);
 		}
 		return;
 	}
-	if( typeof callback ==='Array'){
-		callbacks = callback;
+	if( callback instanceof Array){
+		var callbacks = callback;
 		callback = function(){
 			$.toolkit.loadScript.apply(null,callbacks);
-		}
+		};
 	}
 	if(eval("typeof " + waitFor) !== 'undefined' && callback){
 		return callback();
@@ -474,7 +479,7 @@ $.toolkit.loadScript = function(uri,callback,waitFor){
 					if( s.readyState === 'complete' || s.readyState === 'loaded' )
 						s.onreadystatechange=null;
 						callback();
-				}
+				};
 			}else{
 				s.onload=callback;
 			}
@@ -482,7 +487,7 @@ $.toolkit.loadScript = function(uri,callback,waitFor){
 	}
 	parent.appendChild(elmt);
 	return;
-}
+};
 /**
 * allow to be sure to get a plugin instance from plugin instance or element on which the plugin is applyied.
 * @param object  elmt         the pluginInstance or the element we want the plugin instance of
@@ -535,7 +540,7 @@ $.toolkit._readClassNameOpts=function(elmt,baseClass,optionsList){
 	var opts={}, optName='', id=0, exp = '(?:^|\\s)'+baseClass+'(?=-)',noCaptureExp = /(^|[^\\])\((?!\?)/g, oVals;
 	for(optName in optionsList ){
 		oVals = optionsList[optName].replace(noCaptureExp,'$1(?:');//-- avoid capture parentheses inside expression
-		exp += ( oVals.substr(0,1)=='|' )?'(?:-('+oVals.substr(1)+'))?':'-('+oVals+')';
+		exp += ( oVals.substr(0,1)==='|' )?'(?:-('+oVals.substr(1)+'))?':'-('+oVals+')';
 	}
 	exp = new RegExp(exp+'(?:$|\\s)');
 	var matches = classAttr.match(exp);
@@ -580,12 +585,12 @@ $.toolkit._removeClassExp = function(elmt,exp,add){
 $.toolkit.requestUniqueId = function(){
 	var tk;
 	try{
-		tk = window.top.jQuery.toolkit;
+		tk = ( window.top.jQuery && window.top.jQuery.toolkit )? window.top.jQuery.toolkit : $.toolkit;
 	}catch(e){
-		tk = window.jQuery.toolkit;
+		tk = $.toolkit;
 	}
 	return 'tkUID'+ (( tk._uniqueId && ++tk._uniqueId ) || (tk._uniqueId = 1));
-}
+};
 
 /**
 * allow to test css media queries
@@ -612,18 +617,18 @@ $.extend($.fn,{
 	ensureId:function(){
 		return this.each(function(){
 			var e = $(this)
-				, id = e.attr('id');
+				, id = e.prop('id');
 			if( undefined === id){
 				return ;
 			}
 			if( typeof id !== 'object' && id.length < 1 ){
-				e.attr('id',$.toolkit.requestUniqueId());
+				e.prop('id',$.toolkit.requestUniqueId());
 			}
 		});
 	},
 	disable:function(state){
 		state = state===undefined?true:(state?true:false);
-		this.attr("disabled",state?"disabled":false)
+		this.prop("disabled",state?true:false)
 		.attr("aria-disabled",state?"disabled":false)
 		.toggleClass("tk-state-disabled",state);
 		return this;
@@ -642,7 +647,7 @@ $.extend($.fn,{
 		return this._removeClassExp(this,'tk-state-(?!'+stateGroups.join('|')+')*','tk-state-'+state);
 	},
 	textChildren: function(){
-		var res = [],childs=this.attr('childNodes'),i,l;
+		var res = [],childs=this.prop('childNodes'),i,l;
 		for( i=0,l=childs.length;i<l;i++){
 			if( childs[i].nodeType===3 ){
 				res.push(childs[i]);
