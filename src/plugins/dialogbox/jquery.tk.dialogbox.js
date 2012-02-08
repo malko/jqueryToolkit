@@ -1,10 +1,10 @@
 /**
 *
 * @changelog
+* - 2012-02-01 - add support for position as an option parameter
 * - 2010-09-26 - allow empty button in confirmbox
 * - 2010-08-11 - move exposeShadow creation to first showExpose() call
 */
-
 (function($){
 
 //create a dialog shadow once and for all;
@@ -69,7 +69,9 @@ var exposeShadow = null
 	;
 //-- settings for exposure
 $.tk.exposeShadow ={
-	defaults:{
+	show:showExpose
+	,hide:hideExpose
+	,defaults:{
 		show:['slideDown',250]
 		, hide:['slideUp',250]
 	}
@@ -120,7 +122,7 @@ $.toolkit('tk.dialogbox',{
 	_set_escapeClose:function(escapeClose){
 		var self = this;
 		if( escapeClose==='noescape'){
-			escapeClose = false
+			escapeClose = false;
 		}else{
 			escapeClose = escapeClose?true:false;
 		}
@@ -166,9 +168,30 @@ $.toolkit('tk.dialogbox',{
 			}
 			exposedDialogbox++;
 		}
+		var pos=null;
+		if( this.options.position ){
+			if( this.options.position instanceof Array){
+				pos = {
+					left:this.options.position[0]
+					,top:this.options.position[1]
+				};
+			}else if( $.isFunction(this.options.position) ){
+				pos = this.options.position();
+			}else if( this.options.position !== null ){
+				try{
+					pos = {
+						left:this.options.position.left
+						,top:this.options.position.top
+					};
+				}catch(e){ pos = null; }
+			}
+		}
 		this.elmt.addClass('tk-dialogbox '+this.options.classes)
 			.show()
-			.css({ top: $(window).scrollTop()+($(window).height()/2)-this.elmt.height()/2 , marginLeft:-(this.elmt.outerWidth()/2)})
+			.css({
+				left: (pos && pos.left !== undefined) ? pos.left : Math.round($(window).scrollLeft()+($(window).width()/2)-this.elmt.width()/2)
+				,top: (pos && pos.top !== undefined) ? pos.top : Math.round($(window).scrollTop()+($(window).height()/2)-this.elmt.height()/2)
+			});
 		openedDialogbox++;
 		if( this.options.escapeClose ){
 			_setEscapeCloseCallback('add',this);
@@ -204,6 +227,7 @@ $.tk.dialogbox.defaults={
 	, titleClasses:'tk-border-bottom tk-corner-top' // default styling classNames for the dialogbox element
 	, escapeClose:true // if true then pressing escape key will close the dialogbox
 	, title: true // can be false for no title, a string to use as title or true to use the title attribute of the element as title
+	, position: null // may be an offset object (ie: {top:y,left:x} ), a function that return an offset or anything else will be interpreted as auto centered placement
 };
 
 $.toolkit('tk.confirmbox','dialogbox',{
@@ -254,12 +278,14 @@ $.toolkit('tk.confirmbox','dialogbox',{
 	_set_confirmLabel: function(str){
 		this._buttonBox.find('.tk-confirmbox-confirmButton')
 			.html(str)
-			.toggle(str!='');
+			.toggle(str?true:false)
+		;
 	},
 	_set_cancelLabel: function(str){
 		this._buttonBox.find('.tk-confirmbox-cancelButton')
 			.html(str)
-			.toggle(str!='');
+			.toggle(str?true:false)
+		;
 	}
 
 });

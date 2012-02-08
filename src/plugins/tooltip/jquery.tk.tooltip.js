@@ -27,7 +27,7 @@ $.toolkit('tk.tooltip',{
 	},
 	_init:function(){
 		var self = this,
-			ttipId = "tooltip_"+self.elmt.attr('id');
+			ttipId = "tooltip_"+self.elmt.prop('id');
 		self._wrapper = $('<div class="tk-tooltip-wrapper tk-border tk-corner" role="tooltip" id="'+ttipId+'"><div class="tk-tooltip-msg"></div><div class="tk-pointer"><div class="tk-pointer-bg"><span>&nbsp;</span></div></div></div>');
 		self.elmt.attr("aria-describedby", ttipId);
 		self._msg = self._wrapper.find('.tk-tooltip-msg');
@@ -118,6 +118,9 @@ $.toolkit('tk.tooltip',{
 		this._setPointerColor(this._tk.initialized);
 	},
 	_set_connector:function(c){
+		if( $.browser.msie && $.browser.version < 7){
+			c=false;
+		}
 		this._pointer.toggle(this.options.connector=c?true:false);
 		//this._wrapper.positionRelative('set_space',this.options.spacing+(this.options.connector?16:0));
 		this._applyOpts('spacing');

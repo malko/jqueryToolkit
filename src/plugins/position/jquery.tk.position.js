@@ -3,6 +3,7 @@
 	allow an element to be positioned at the given offset setting its position handler.
 	be aware that margin are taken into consideration when positionning the element.
 	@changelog
+		- 2011-12-20 - add stick edgePolicy support for center|middle|pixsel hPos|vPos
 		- 2011-03-18 - add mousemove binding to frame/iframe when mouseRelative is binded.
 		- 2010-06-23 - add some NaN check that can crash the script under ie
 */
@@ -302,6 +303,7 @@ $.toolkit('tk.positionRelative',{
 				break;
 			default:
 				pos.y += offset.top + parseFloat(vPos) - s + (borderPolicy?borderTopWidth:0);
+				pos.yRef = 'top';
 		}
 		this.elmt.positionable('set',pos);
 		if( vPos !== this._realPos.v ){
@@ -363,6 +365,7 @@ $.toolkit('tk.positionRelative',{
 				break;
 			default:
 				pos.x += offset.left + parseFloat(hPos) - s + (borderPolicy?borderLeftWidth:0);
+				pos.xRef = 'left';
 		}
 		this.elmt.positionable('set',pos);
 		if( hPos !== this._realPos.h ){
@@ -387,11 +390,11 @@ $.toolkit('tk.positionRelative',{
 			offset = this.elmt.offset(),
 			policy = this.options.vEdgePolicy,
 			p = this.options.vPos.match(/(bottom|top|middle)$/i);
-		if(! p ){
+		if( p === 'none' ){
 			return;
 		}
 		this.options.vEdgePolicy='none';
-		p = p[1].toLowerCase();
+		p = p ? p[1].toLowerCase() : null;
 		switch(p){
 			case 'top':
 				if( offset.top < wTop ){
@@ -418,7 +421,21 @@ $.toolkit('tk.positionRelative',{
 					}
 				}
 				break;
-			//@todo manage pixel and middle positionning
+			case 'middle':
+			default:
+				if( policy !== 'stick'){ // only manage stick policy
+					break;
+				}
+				if( offset.top < wTop ){
+					if( wTop < (this._related.offset().top + this._related.outerHeight() + this.options.vSpace)){
+						this.elmt.positionable('set',{yRef:'top',y:wTop});
+					}
+				}else if(offset.top + this.elmt.outerHeight() > wBottom ){
+					if( wBottom > (this._related.offset().top - this.options.vSpace) ) {
+						this.elmt.positionable('set',{yRef:'bottom',y:wBottom});
+					}
+				}
+				break;
 		}
 		this.options.vEdgePolicy=policy;
 	},
@@ -431,11 +448,11 @@ $.toolkit('tk.positionRelative',{
 			offset = this.elmt.offset(),
 			policy = this.options.hEdgePolicy,
 			p = this.options.hPos.match(/(left|right|center)$/i);
-		if(! p ){
+		if( p === 'none'){
 			return;
 		}
 		this.options.hEdgePolicy='none';
-		p = p[1].toLowerCase();
+		p = p ? p[1].toLowerCase() : null;
 		switch(p){
 			case 'left':
 				if( offset.left < wLeft ){
@@ -462,7 +479,21 @@ $.toolkit('tk.positionRelative',{
 					}
 				}
 				break;
-			//@todo manage pixel and center positionning
+			case 'center':
+			default:
+				if( policy !== 'stick'){ // only manage stick policy
+					break;
+				}
+				if( offset.left < wLeft ){
+					if( wLeft < (this._related.offset().left + this._related.outerWidth() + this.options.hSpace)){
+						this.elmt.positionable('set',{xRef:'left',x:wLeft});
+					}
+				}else	if(offset.left + this.elmt.outerWidth() > wRight ){
+					if( wRight > (this._related.offset().left - this.options.hSpace) ) {
+						this.elmt.positionable('set',{xRef:'right',x:wRight});
+					}
+				}
+				break;
 		}
 		this.options.hEdgePolicy=policy;
 	}

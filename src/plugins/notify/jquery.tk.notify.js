@@ -139,7 +139,15 @@ $.toolkit('tk.notify',{
 			self.wrapper.appendTo(self.options.notifybox);
 		}
 		self.wrapper.hide()
-			.click(function(e){self.hide(e);})
+			.click(function(e){
+					if( document.elementFromPoint ){ //-- is there a support to click through the notification or not
+						self.elmt.hide();
+						$(self.elmt.attr('ownerDocument').elementFromPoint(e.pageX,e.pageY)).trigger('click',e);
+						self.elmt.show();
+					}else{
+						self.hide(e);
+					}
+			})
 			.append(self.elmt.addClass('tk-notify-msg tk-corner').show())
 			.hover(function(){$(this).addClass('tk-notify-wrapper-hover');},function(){$(this).removeClass('tk-notify-wrapper-hover')});
 		self.show();
