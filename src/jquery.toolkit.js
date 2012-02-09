@@ -376,7 +376,7 @@ $.toolkit.initPlugins = function(pluginNames,nameSpace,context){
 		nameSpace = 'tk';
 		if( ! $.tk ){ $.tk={}; }
 	}
-	if( pluginNames === '' || undefined = pluginNames){
+	if( pluginNames === '' || undefined === pluginNames){
 		pluginNames = 'all';
 	}
 	if(typeof pluginNames === 'string'){
