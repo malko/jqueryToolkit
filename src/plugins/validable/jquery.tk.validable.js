@@ -25,25 +25,27 @@ formValidableOptions = {
 };
 $('#myForm').validable(formValidableOptions);
 @changelog
- - 2010-10-05 - add mustValidate to required classNameOption
-           - 2010-07-30 - validable_formGetState only trigger when initialized
-           - 2010-06-30 - add getStateAutoScroll option
-                        - getState on form now ignore disabled elements
-                        - propagate event thrue getState validation callbacks (second parameters)
-           - 2010-06-10 - add ualpha[num] methods for checking input alphanum chars without accented chars and single quote
-           - 2010-06-09 - add confirm method as predefined defaultRules
-           - 2010-05-14 - remove eval on unknown callback rule assignation (replaced by new Function)
-           - 2010-05-10 - add possibility for null/'none' as stateElmt option value
-                        - bug correction checking empty select sets
-           - 2010-04-02 - form.validable will force any :input with a tk-validable* class to be promotted to validable widget nevermind the alwaysSetState option
-           - 2010-04-01 - add _classNameOptions
-                        - add @title support and make it default value for help option
-                        - some bug correction
-           - 2010-03-31 - add required:-1 option and correctly remove tk-required class when set to false
-           - 2010-03-30 - check radio/checkbox are checked when required
-                        - add event validable_formGetState(event,elmt,state) emitted on form checking state; (stop submission if return false)
-           - 2009-10-22 - add options helpTrigger and helpAfter
-           - 2009-10-20 - add support for string callbacks
+	- 2013-01-10 - add support for novalidate attribute on html5 forms elements (default to true)
+	- 2012-03-13 - add support for pattern attribute
+	- 2010-10-05 - add mustValidate to required classNameOption
+	- 2010-07-30 - validable_formGetState only trigger when initialized
+	- 2010-06-30 - add getStateAutoScroll option
+							 - getState on form now ignore disabled elements
+							 - propagate event thrue getState validation callbacks (second parameters)
+	- 2010-06-10 - add ualpha[num] methods for checking input alphanum chars without accented chars and single quote
+	- 2010-06-09 - add confirm method as predefined defaultRules
+	- 2010-05-14 - remove eval on unknown callback rule assignation (replaced by new Function)
+	- 2010-05-10 - add possibility for null/'none' as stateElmt option value
+							 - bug correction checking empty select sets
+	- 2010-04-02 - form.validable will force any :input with a tk-validable* class to be promotted to validable widget nevermind the alwaysSetState option
+	- 2010-04-01 - add _classNameOptions
+							 - add @title support and make it default value for help option
+							 - some bug correction
+	- 2010-03-31 - add required:-1 option and correctly remove tk-required class when set to false
+	- 2010-03-30 - check radio/checkbox are checked when required
+							 - add event validable_formGetState(event,elmt,state) emitted on form checking state; (stop submission if return false)
+	- 2009-10-22 - add options helpTrigger and helpAfter
+	- 2009-10-20 - add support for string callbacks
 @knownBugs
  - trying to make validable a form with no id attribute but with an input named id will lead to problem under fucking buggy internet explorer
    to workaround either use a different name for your input element or simply declare an id attribute to your form in the original html code
@@ -75,13 +77,21 @@ $('#myForm').validable(formValidableOptions);
 			if( self.elmt.is('form')){
 				var dfltInputOptions= $.extend({},self.options);
 				delete dfltInputOptions.rules;
+				if( self.options.novalidate ){
+					self.elmt.attr('novalidate','novalidate');
+				}
 				if(! self.options.rules){
 					self.options.rules = {};
 				}
 				self.elmt.find(':input:not(button,[type=submit],[type=reset],[type=hidden])').each(function(){
-					var input=$(this),
-						iname = input.attr('name').replace(/\[.*$/,''),
-						inlineOpts = $.extend({},dfltInputOptions,$.toolkit._readClassNameOpts(input,'tk-validable',self._classNameOptions));
+					var input=$(this)
+						,inlineOpts = $.extend({},dfltInputOptions,$.toolkit._readClassNameOpts(input,'tk-validable',self._classNameOptions))
+						iname = input.attr('name')
+					;
+					if(! iname ){
+						return;
+					}
+					iname = iname.replace(/\[.*$/,'');
 					if( self.options.rules[iname]){
 						input.validable($.extend({},inlineOpts,self.options.rules[iname]));
 					}else if(self.options.alwaysSetState || input.is('[class*=tk-validable]')){
@@ -129,6 +139,9 @@ $('#myForm').validable(formValidableOptions);
 		},
 		_set_rule:function(rule){
 			var self = this;
+			if( !rule && self.elmt.attr('pattern') ){
+				rule = "/^"+self.elmt.attr('pattern')+'$/';
+			}
 			if( typeof rule === 'string' ){
 				var isRegExpString = rule.match(/^\/(.+)\/([mgi]{0,3})?$/);
 				if(  isRegExpString ){
@@ -374,7 +387,8 @@ $('#myForm').validable(formValidableOptions);
 				}
 			}
 			if( self.options.required === true){
-				switch( self.elmt.attr('type').toLowerCase()){
+				var type= self.elmt.is('select')?'select':(self.elmt.is('textarea')?'textarea':self.elmt.attr('type'));
+				switch( type.toLowerCase()){
 					case 'radio':
 					case 'checkbox':
 						// check one at least is checked
@@ -411,7 +425,9 @@ $('#myForm').validable(formValidableOptions);
 			position:'middle-right',
 			stickyMouse:false,
 			edgePolicy:'opposite'
-		}
+		},
+		novalidate:true
+
 	};
 
 	if( typeof removeAccents === 'undefined'){
