@@ -27,19 +27,22 @@ it also can display a measurable area by holding down mouse button while moving.
 
 		_init:function(){
 			var self = this,zIndex=0;
+			self._context = self.elmt[0].ownerDocument;
+			self._body = $('body',self._context);
+
 			//-- check for highest z-index value
-			$('*').each(function(){
+			$('*',self._context).each(function(){
 				zIndex=Math.max(zIndex,parseInt($(this).css('zIndex'),10)||0);
 			});
 			zIndex+=1;
 			//-- create elements needed for measure
-			self.top = $('<div class="'+self._tk.baseClass+'-vertical"/>');
-			self.right = $('<div class="'+self._tk.baseClass+'-horizontal"/>');
-			self.bottom = $('<div class="'+self._tk.baseClass+'-vertical"/>');
-			self.left = $('<div class="'+self._tk.baseClass+'-horizontal"/>');
-			self.square = $('<div class="'+self._tk.baseClass+'-square"/>').appendTo('body').css('zIndex',zIndex);
-			self.display = $('<div class="'+self._tk.baseClass+'-display tk-corner tk-content"/>');
-			self.all = $([self.top[0],self.right[0],self.bottom[0],self.left[0],self.display[0]]).appendTo('body').css('zIndex',zIndex);
+			self.top = $('<div class="'+self._tk.baseClass+'-vertical"/>',self._context);
+			self.right = $('<div class="'+self._tk.baseClass+'-horizontal"/>',self._context);
+			self.bottom = $('<div class="'+self._tk.baseClass+'-vertical"/>',self._context);
+			self.left = $('<div class="'+self._tk.baseClass+'-horizontal"/>',self._context);
+			self.square = $('<div class="'+self._tk.baseClass+'-square"/>',self._context).appendTo(self._body).css('zIndex',zIndex);
+			self.display = $('<div class="'+self._tk.baseClass+'-display tk-corner tk-content"/>',self._context);
+			self.all = $([self.top[0],self.right[0],self.bottom[0],self.left[0],self.display[0]]).appendTo(self._body).css('zIndex',zIndex);
 			self.elmt.bind('mousedown.measure',function(e){self.toggle(e);return false;});
 		},
 		toggle:function(e){
@@ -49,14 +52,14 @@ it also can display a measurable area by holding down mouse button while moving.
 			var self = this;
 			self.all.show();
 			self.square.hide();
-			$('body').bind('mousemove.measure',function(e){self.move(e);return false;});
-			$('body').bind('keydown.measure',function(e){if( e.which===27) self.stop();})
-			$('body').bind('mousedown.measure',function(e){self.squareStart(e);e.preventDefault();return false;});
+			self._body.bind('mousemove.measure',function(e){self.move(e);return false;});
+			self._body.bind('keydown.measure',function(e){if( e.which===27) self.stop();})
+			self._body.bind('mousedown.measure',function(e){self.squareStart(e);e.preventDefault();return false;});
 			self.move(e);
 			self.active=true;
 		},
 		stop:function(e){
-			$('body').unbind('.measure');
+			this._body.unbind('.measure');
 			this.all.hide();
 			this.square.hide();
 			this.active=false;
@@ -64,21 +67,21 @@ it also can display a measurable area by holding down mouse button while moving.
 
 		squareStart:function(e){
 			var self = this, pageX = e?e.pageX:0, pageY=e?e.pageY:0;
-			$('body').one('mouseup.measure',function(e){self.squareEnd(e);});
+			self._body.one('mouseup.measure',function(e){self.squareEnd(e);});
 			self.squareStartPos=[pageX,pageY];
 			self.square.css({height:0,width:0,top:pageY,left:pageX,opacity:self.options.squareOpacity}).addClass(self.options.squareClass).show();
-			$('body').addClass('tk-unselectable');
+			self._body.addClass('tk-unselectable');
 		},
 		squareEnd:function(e){
 			var self = this;
 			self.square.hide();
-			$('body').removeClass('tk-unselectable');
+			self._body.removeClass('tk-unselectable');
 		},
 
 		move:function(e){
 			var self = this
 				//, doc=$(document)
-				, w=$(window)
+				, w=$('defaultView' in self._context? self._context.defaultView : self._context.parentWindow)
 				, space=self.options.space
 				//- , msg='<u>x:</u> '+e.pageX+' <u>y:</u> '+e.pageY
 				, x = (e?e.pageX:0)
@@ -128,7 +131,6 @@ it also can display a measurable area by holding down mouse button while moving.
 		space:10,
 		squareOpacity:.7,
 		squareClass:'tk-state-normal'
-
 	};
 
 })(jQuery);

@@ -122,6 +122,7 @@ $.toolkit = function(pluginName,basePlugin,prototype){
 		var inlineOptions = self._classNameOptions?$.toolkit._readClassNameOpts(self.elmt,self._tk.baseClass,self._classNameOptions):{};
 		self.elmt.addClass(self._tk.baseClass);
 		self.options=$.extend(
+			true,
 			{},
 			$[nameSpace][pluginName].defaults||{},
 			inlineOptions,
@@ -412,7 +413,7 @@ $.toolkit.initPlugins = function(pluginNames,nameSpace,context){
 		}
 		if( $[nameSpace] && $[nameSpace][p] && $.isFunction($[nameSpace][p].initPlugin)){
 			$[nameSpace][p].initPlugin(context);
-		}else{
+		}else if( $.isFunction($.fn[p]) ){
 			new Function("c","jQuery('."+nameSpace+"-"+p+"',c)."+p+"()")(context);
 		}
 	}
@@ -644,7 +645,7 @@ $.extend($.fn,{
 		}
 		if( dontOverride && this.attr('class').match(/(?:^|\s)tk-state-[a-zA-Z_0-9_-]+(?=$|\s)/))
 			return this;
-		return this._removeClassExp(this,'tk-state-(?!'+stateGroups.join('|')+')*','tk-state-'+state);
+		return $.toolkit._removeClassExp(this,'tk-state-(?!'+stateGroups.join('|')+')*','tk-state-'+state);
 	},
 	textChildren: function(){
 		var res = [],childs=this.prop('childNodes'),i,l;

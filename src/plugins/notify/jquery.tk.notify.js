@@ -142,7 +142,7 @@ $.toolkit('tk.notify',{
 			.click(function(e){
 					if( document.elementFromPoint ){ //-- is there a support to click through the notification or not
 						self.elmt.hide();
-						$(self.elmt.attr('ownerDocument').elementFromPoint(e.pageX,e.pageY)).trigger('click',e);
+						$(self.elmt.prop('ownerDocument').elementFromPoint(e.pageX,e.pageY)).trigger('click',e);
 						self.elmt.show();
 					}else{
 						self.hide(e);

@@ -6,23 +6,25 @@ some function to set some css rules accross many browser with dynamic values.
 */
 (function($) {
 var extendedRules = {
-	background  : ['backgroundAttachment','backgroundColor','backgroundImage','backgroundPosition','backgroundRepeat'],
-	border      : ['borderColor','borderCollapse','borderStyle','borderWidth','borderTop', 'borderRight', 'borderBottom','borderLeft'],
-	borderTop   : ['borderTopStyle','borderTopWidth','borderTopColor'],
-	borderRight : ['borderRightStyle','borderRightWidth','borderRightColor'],
-	borderBottom: ['borderBottomStyle','borderBottomWidth','borderBottomColor'],
-	borderLeft  : ['borderLeftStyle','borderLeftWidth','borderLeftColor'],
-	borderRadius: ['borderTopLeftRadius','borderTopRightRadius','borderBottomLeftRadius','borderBottomRightRadius','MozBorderRadius','webkitBorderRadius'],
-	borderRadiusTopLeft:['MozBorderRadiusTopLeft','webkitBorderTopLeftRadius'],
-	borderRadiusTopRight:['MozBorderRadiusTopRight','webkitBorderTopRightRadius'],
-	borderRadiusBottomLeft:['MozBorderRadiusBottomLeft','webkitBorderBottomLeftRadius'],
-	borderRadiusBottomRight:['MozBorderRadiusBottomRight','webkitBorderBottomRightRadius'],
-	font        : ['fontFamily','fontSize','fontStyle','fontVariant','fontWeight'],
-	listStyle   : ['listStyleImage','listStylePosition','listStyleType'],
-	margin      : ['marginTop','marginRight','marginBottom','marginLeft'],
-	opacity			: ['MozOpacity','webkitOpacity','filter'],
-	outline     : ['outlineColor','outlineStyle','outlineWidth'],
-	padding     : ['paddingTop','paddingRight','paddingBottom','paddingLeft']
+	background  : ['backgroundAttachment','backgroundColor','backgroundImage','backgroundPosition','backgroundRepeat']
+	,border      : ['borderColor','borderCollapse','borderStyle','borderWidth','borderTop', 'borderRight', 'borderBottom','borderLeft']
+	,borderTop   : ['borderTopStyle','borderTopWidth','borderTopColor']
+	,borderRight : ['borderRightStyle','borderRightWidth','borderRightColor']
+	,borderBottom: ['borderBottomStyle','borderBottomWidth','borderBottomColor']
+	,borderLeft  : ['borderLeftStyle','borderLeftWidth','borderLeftColor']
+	,borderRadius: ['borderTopLeftRadius','borderTopRightRadius','borderBottomLeftRadius','borderBottomRightRadius','MozBorderRadius','webkitBorderRadius']
+	,borderRadiusTopLeft:['MozBorderRadiusTopLeft','webkitBorderTopLeftRadius']
+	,borderRadiusTopRight:['MozBorderRadiusTopRight','webkitBorderTopRightRadius']
+	,borderRadiusBottomLeft:['MozBorderRadiusBottomLeft','webkitBorderBottomLeftRadius']
+	,borderRadiusBottomRight:['MozBorderRadiusBottomRight','webkitBorderBottomRightRadius']
+	,font        : ['fontFamily','fontSize','fontStyle','fontVariant','fontWeight']
+	,listStyle   : ['listStyleImage','listStylePosition','listStyleType']
+	,margin      : ['marginTop','marginRight','marginBottom','marginLeft']
+	,opacity     : ['MozOpacity','webkitOpacity','filter']
+	,outline     : ['outlineColor','outlineStyle','outlineWidth']
+	,padding     : ['paddingTop','paddingRight','paddingBottom','paddingLeft']
+	,layout      : ['margin','padding','width','height','font','border','outline']
+
 };
 
 var _copyCssRules =function (rules,from,to,transfert){
@@ -52,6 +54,41 @@ var _copyCssRules =function (rules,from,to,transfert){
 		}
 	}
 };
+
+$.toolkit('tk.cssreplicant',{
+	_classNameOptions:{
+		updateOn:"|click|change|focus|blur|mouse(over|up|down|leave|enter|out)"
+		,ruleSet:"|.*"
+	}
+	,init:function(){
+		this.origin = null;
+		this._applyOpts('updateOn|ruleSet|origin');
+	}
+	,_set_updateOn:function(e){
+		var self = this;
+		self.elmt.unbind('.cssreplicant');
+		if( e ){
+			self.elmt.bind(e,function(){ self.update() })
+		}
+	}
+	,_set_ruleSet:function(r){
+		return r.replace(/[^a-z0-9\|]+/ig,'|');
+	}
+	,update:function(){
+		if( ! this.origin ){
+			return;
+		}
+		_copyCssRules(this.options.ruleSet.split('|'),this.origin===rel?this.elmt.attr('rel'):this.options.origin,this.elmt);
+	}
+});
+
+$.tk.cssreplicant.defaults={
+	updateOn:null
+	,ruleSet:null
+	,origin:'rel' // default to replic element pointed in rel attribute
+}
+
+
 
 $.toolkit('tk.xcss',{
 
@@ -103,7 +140,10 @@ $.toolkit('tk.xcss',{
 	}
 
 });
-$.tk.xcss.defaults={};
+$.tk.xcss.defaults={
+	source:null // elmt
+	,target:null
+};
 
 
 })(jQuery);
