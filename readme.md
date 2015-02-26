@@ -5,7 +5,7 @@
 $.toolkit('namespace.pluginName',{..protoype..});
 ```
 
-creating your plugin with toolkit like describe above you know may instantiate
+creating your plugin with toolkit like describe above you now may instantiate
 your plugin by doing:
 
 ```javascript
